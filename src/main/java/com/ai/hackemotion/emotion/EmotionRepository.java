@@ -1,9 +1,8 @@
 package com.ai.hackemotion.emotion;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
+import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.Optional;
 
-public interface EmotionRepository extends JpaRepository<Emotion, Long> {
+public interface EmotionRepository extends MongoRepository<Emotion, String> {
     Optional<Emotion> findByName(String name);
 }

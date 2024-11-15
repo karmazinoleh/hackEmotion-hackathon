@@ -1,12 +1,9 @@
 package com.ai.hackemotion.asset;
 
+import org.springframework.data.mongodb.repository.MongoRepository;
 
-import com.ai.hackemotion.emotion.Emotion;
-import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Optional;
 
-import java.util.List;
-
-public interface AssetRepository extends JpaRepository<Asset, Long> {
-
-    List<Asset> findAllByEmotions(Emotion emotion);
+public interface AssetRepository extends MongoRepository<Asset, String> {
+    Optional<Asset> findByName(String name);
 }

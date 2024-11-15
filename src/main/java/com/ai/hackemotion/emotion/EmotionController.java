@@ -1,20 +1,14 @@
 package com.ai.hackemotion.emotion;
 
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("emotion")
 public class EmotionController {
-
     private final EmotionService emotionService;
-    private final EmotionRepository emotionRepository;
 
-    public EmotionController(EmotionService emotionService, EmotionRepository emotionRepository) {
+    public EmotionController(EmotionService emotionService) {
         this.emotionService = emotionService;
-        this.emotionRepository = emotionRepository;
     }
 
     @PostMapping("add")
@@ -22,6 +16,4 @@ public class EmotionController {
         emotionService.addEmotion(request.getEmotionName());
         return "Emotion was created!";
     }
-
-
 }
