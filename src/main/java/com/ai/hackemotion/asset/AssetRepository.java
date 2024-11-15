@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface AssetRepository extends JpaRepository<Asset, Long> {
 
-    List<Emotion> findAllByEmotion(Emotion emotion);
+    List<Asset> findAllByEmotions(Emotion emotion);
 }
