@@ -33,6 +33,8 @@ public class AmazonS3Service {
     }
 
     public String uploadFile(String fileName, InputStream fileInputStream, String contentType) throws IOException {
+        fileName = fileName.replace(" ", "_");
+
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(fileName)

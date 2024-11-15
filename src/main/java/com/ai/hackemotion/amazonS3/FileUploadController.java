@@ -31,6 +31,5 @@ public class FileUploadController {
                     .body("File upload failed: " + e.getMessage());
         }
     }
-    
 }
 
