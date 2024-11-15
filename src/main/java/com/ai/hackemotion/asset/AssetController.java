@@ -1,28 +1,26 @@
 package com.ai.hackemotion.asset;
 
-import com.ai.hackemotion.emotion.Emotion;
-import com.ai.hackemotion.emotion.EmotionService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("asset")
 public class AssetController {
-
     private final AssetService assetService;
 
     public AssetController(AssetService assetService) {
         this.assetService = assetService;
     }
 
-    @PostMapping("/{assetId}/add-emotions")
+    @PostMapping("/{assetName}/add-emotions")
     public ResponseEntity<Asset> addEmotions(
-            @PathVariable Long assetId,
+            @PathVariable String assetName,
             @RequestBody List<String> emotionNames) {
-        return ResponseEntity.ok(assetService.addEmotionsToAsset(assetId, emotionNames));
+        return ResponseEntity.ok(assetService.addEmotionsToAsset(assetName, emotionNames));
     }
 
     @PostMapping("/create-asset")
@@ -30,10 +28,10 @@ public class AssetController {
         return ResponseEntity.ok(assetService.createAsset(request));
     }
 
-    /* @PostMapping("create-batch-assets")
-    public Asset createBatchAssets(@RequestBody List<Asset> assets) {
-        return assets;
-    } */
+    @GetMapping("/{assetId}/emotions")
+    public ResponseEntity<List<String>> getEmotionsByAssetId(@PathVariable String assetId) {
+        return ResponseEntity.ok(assetService.getEmotionNamesByAssetId(assetId));
+    }
 
 
 }

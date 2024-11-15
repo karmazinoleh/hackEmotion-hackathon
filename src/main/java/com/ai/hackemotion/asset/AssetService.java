@@ -2,18 +2,13 @@ package com.ai.hackemotion.asset;
 
 import com.ai.hackemotion.emotion.Emotion;
 import com.ai.hackemotion.emotion.EmotionRepository;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class AssetService {
-
     private final AssetRepository assetRepository;
     private final EmotionRepository emotionRepository;
 
@@ -22,7 +17,15 @@ public class AssetService {
         this.emotionRepository = emotionRepository;
     }
 
-    @Transactional
+    public List<String> getEmotionNamesByAssetId(String assetId) {
+        Asset asset = assetRepository.findById(assetId)
+                .orElseThrow(() -> new RuntimeException("Asset not found with id: " + assetId));
+
+        return asset.getEmotions().stream()
+                .map(Emotion::getName)
+                .collect(Collectors.toList());
+    }
+
     public Asset createAsset(AssetRequest request) {
         Asset asset = Asset.builder()
                 .url(request.getUrl())
@@ -31,20 +34,17 @@ public class AssetService {
         return assetRepository.save(asset);
     }
 
-    @Transactional
-    public Asset addEmotionsToAsset(Long assetId, List<String> emotionNames) {
-        Asset asset = assetRepository.findById(assetId)
-                .orElseThrow(() -> new EntityNotFoundException("Asset not found with id: " + assetId));
+    public Asset addEmotionsToAsset(String assetName, List<String> emotionNames) {
+        Asset asset = assetRepository.findByName(assetName)
+                .orElseThrow(() -> new RuntimeException("Asset not found with name: " + assetName));
 
-        Set<Emotion> emotions = emotionNames.stream()
+        List<Emotion> emotions = emotionNames.stream()
                 .map(name -> emotionRepository.findByName(name)
-                        .orElseThrow(() -> new EntityNotFoundException("Emotion not found: " + name)))
-                .collect(Collectors.toSet());
+                        .orElseThrow(() -> new RuntimeException("Emotion not found: " + name)))
+                .toList();
 
-        for (Emotion emotion : emotions) {
-            asset.addEmotion(emotion);
-        }
-
+        asset.getEmotions().addAll(emotions);
         return assetRepository.save(asset);
     }
+
 }
