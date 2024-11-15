@@ -17,12 +17,12 @@ public class AssetService {
         this.emotionRepository = emotionRepository;
     }
 
-    public List<String> getEmotionNamesByAssetId(String assetId) {
+    public List<String> getEmotionNamesWithIntensityByAssetId(String assetId) {
         Asset asset = assetRepository.findById(assetId)
                 .orElseThrow(() -> new RuntimeException("Asset not found with id: " + assetId));
 
         return asset.getEmotions().stream()
-                .map(Emotion::getName)
+                .map(assignment -> assignment.getEmotion().getName() + " (Intensity: " + assignment.getIntensity() + ")")
                 .collect(Collectors.toList());
     }
 
@@ -34,16 +34,23 @@ public class AssetService {
         return assetRepository.save(asset);
     }
 
-    public Asset addEmotionsToAsset(String assetName, List<String> emotionNames) {
-        Asset asset = assetRepository.findByName(assetName)
-                .orElseThrow(() -> new RuntimeException("Asset not found with name: " + assetName));
+    public Asset addEmotionsToAsset(String assetId, List<EmotionWithIntensityRequest> emotionsWithIntensity) {
+        Asset asset = assetRepository.findById(assetId)
+                .orElseThrow(() -> new RuntimeException("Asset not found with id: " + assetId));
 
-        List<Emotion> emotions = emotionNames.stream()
-                .map(name -> emotionRepository.findByName(name)
-                        .orElseThrow(() -> new RuntimeException("Emotion not found: " + name)))
-                .toList();
+        List<EmotionAssignment> assignments = emotionsWithIntensity.stream()
+                .map(request -> {
+                    Emotion emotion = emotionRepository.findByName(request.getEmotionName())
+                            .orElseThrow(() -> new RuntimeException("Emotion not found: " + request.getEmotionName()));
 
-        asset.getEmotions().addAll(emotions);
+                    return EmotionAssignment.builder()
+                            .emotion(emotion)
+                            .intensity(request.getIntensity())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        asset.getEmotions().addAll(assignments);
         return assetRepository.save(asset);
     }
 

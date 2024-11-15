@@ -23,12 +23,10 @@ public class Asset {
 
     private String url;
 
-    @Field
     private String name;
 
-    @DocumentReference
     @Builder.Default
-    private Set<Emotion> emotions = new HashSet<>();
+    private Set<EmotionAssignment> emotions = new HashSet<>();
 
     private LocalDateTime localDateTime;
 

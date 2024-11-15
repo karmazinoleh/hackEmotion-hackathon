@@ -16,11 +16,11 @@ public class AssetController {
         this.assetService = assetService;
     }
 
-    @PostMapping("/{assetName}/add-emotions")
+    @PostMapping("/{assetId}/add-emotions")
     public ResponseEntity<Asset> addEmotions(
-            @PathVariable String assetName,
-            @RequestBody List<String> emotionNames) {
-        return ResponseEntity.ok(assetService.addEmotionsToAsset(assetName, emotionNames));
+            @PathVariable String assetId,
+            @RequestBody List<EmotionWithIntensityRequest> emotionsWithIntensity) {
+        return ResponseEntity.ok(assetService.addEmotionsToAsset(assetId, emotionsWithIntensity));
     }
 
     @PostMapping("/create-asset")
@@ -29,9 +29,10 @@ public class AssetController {
     }
 
     @GetMapping("/{assetId}/emotions")
-    public ResponseEntity<List<String>> getEmotionsByAssetId(@PathVariable String assetId) {
-        return ResponseEntity.ok(assetService.getEmotionNamesByAssetId(assetId));
+    public ResponseEntity<List<String>> getEmotionsWithIntensityByAssetId(@PathVariable String assetId) {
+        return ResponseEntity.ok(assetService.getEmotionNamesWithIntensityByAssetId(assetId));
     }
+
 
 
 }
