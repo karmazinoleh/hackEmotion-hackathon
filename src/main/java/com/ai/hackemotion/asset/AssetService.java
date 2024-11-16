@@ -49,5 +49,18 @@ public class AssetService {
         return assetRepository.save(asset);
     }
 
+    public void addAudioToAsset(String assetId, String audioUrl) {
+        // Знайти актив за його ID
+        Asset asset = assetRepository.findById(assetId)
+                .orElseThrow(() -> new IllegalArgumentException("Asset not found with ID: " + assetId));
+
+        // Додати URL аудіо до активу
+        asset.setUrl(audioUrl);
+
+        // Зберегти оновлений актив у базу даних
+        assetRepository.save(asset);
+    }
+
+
 
 }

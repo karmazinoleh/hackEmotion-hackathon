@@ -7,6 +7,13 @@ type EmotionOption = {
     label: string;
 };
 
+type FileWithEmotions = {
+    file: File;
+    previewUrl: string;
+    selectedEmotions: EmotionOption[];
+    intensities: Record<string, number>;
+};
+
 const emotions: EmotionOption[] = [
     { value: "HAPPINESS", label: "Happiness" },
     { value: "SADNESS", label: "Sadness" },
@@ -17,106 +24,122 @@ const emotions: EmotionOption[] = [
 ];
 
 const UploadPage: React.FC = () => {
-    const [file, setFile] = useState<File | null>(null);
-    const [selectedEmotions, setSelectedEmotions] = useState<EmotionOption[]>([]);
-    const [intensities, setIntensities] = useState<Record<string, number>>({});
+    const [filesWithEmotions, setFilesWithEmotions] = useState<FileWithEmotions[]>([]);
 
-    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const handleFilesChange = (event: ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
-            setFile(event.target.files[0]);
+            const newFiles = Array.from(event.target.files).map((file) => ({
+                file,
+                previewUrl: URL.createObjectURL(file), // Створення URL для перегляду
+                selectedEmotions: [],
+                intensities: {},
+            }));
+            setFilesWithEmotions([...filesWithEmotions, ...newFiles]);
         }
     };
 
-    // Оновлена функція для обробки вибору емоцій
-    const handleEmotionChange = (newValue: MultiValue<EmotionOption>) => {
-        const selected = Array.from(newValue) as EmotionOption[]; // Приведення до змінного масиву
-        setSelectedEmotions(selected);
+    const handleEmotionChange = (index: number, newValue: MultiValue<EmotionOption>) => {
+        const updatedFiles = [...filesWithEmotions];
+        const selected = Array.from(newValue) as EmotionOption[];
+        updatedFiles[index].selectedEmotions = selected;
 
         // Ініціалізація інтенсивностей для кожної емоції
         const initialIntensities: Record<string, number> = {};
         selected.forEach((option) => {
-            initialIntensities[option.value] = 50; // Значення за замовчуванням
+            initialIntensities[option.value] = 50;
         });
-        setIntensities(initialIntensities);
+        updatedFiles[index].intensities = initialIntensities;
+        setFilesWithEmotions(updatedFiles);
     };
 
-    const handleIntensityChange = (emotion: string, intensity: number) => {
-        setIntensities({ ...intensities, [emotion]: intensity });
+    const handleIntensityChange = (fileIndex: number, emotion: string, intensity: number) => {
+        const updatedFiles = [...filesWithEmotions];
+        updatedFiles[fileIndex].intensities[emotion] = intensity;
+        setFilesWithEmotions(updatedFiles);
     };
 
     const handleSubmit = async (event: FormEvent) => {
         event.preventDefault();
-        if (!file) {
-            alert("Please select a file!");
+        if (filesWithEmotions.length === 0) {
+            alert("Please select files!");
             return;
         }
 
         try {
-            const formData = new FormData();
-            formData.append("file", file);
+            for (const { file, selectedEmotions, intensities } of filesWithEmotions) {
+                const formData = new FormData();
+                formData.append("file", file);
 
-            // Завантаження файлу на сервер
-            const s3Response = await axios.post("http://localhost:8080/api/files/upload", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
-            // @ts-ignore
-            //const s3Response = await axios.postForm("api/files/upload", {file: this.file})
+                // Завантаження файлу на сервер
+                const s3Response = await axios.post("http://localhost:8080/api/files/upload", formData, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                });
 
-            const fileUrl = s3Response.data.url;
+                const fileUrl = s3Response.data.url;
 
-            const assetResponse = await axios.post("http://localhost:8080/asset/create-asset", {
-                url: fileUrl,
-                name: file.name,
-            });
-            const assetId = assetResponse.data.id;
+                // Створення активу
+                const assetResponse = await axios.post("http://localhost:8080/asset/create-asset", {
+                    url: fileUrl,
+                    name: file.name,
+                });
+                const assetId = assetResponse.data.id;
 
-            // Додавання емоцій до активу
-            const emotionsWithIntensity = selectedEmotions.map((emotion) => ({
-                emotionName: emotion.label,
-                intensity: intensities[emotion.value],
-            }));
-            await axios.post(`http://localhost:8080/asset/${assetId}/add-emotions`, emotionsWithIntensity);
+                // Додавання емоцій до активу
+                const emotionsWithIntensity = selectedEmotions.map((emotion) => ({
+                    emotionName: emotion.label,
+                    intensity: intensities[emotion.value],
+                }));
+                await axios.post(`http://localhost:8080/asset/${assetId}/add-emotions`, emotionsWithIntensity);
+            }
 
-            alert("Image uploaded successfully with emotions!");
+            alert("Files uploaded successfully with emotions!");
         } catch (error) {
-            console.error("Error uploading file:", error);
-            alert("Failed to upload file. Check the console for details.");
+            console.error("Error uploading files:", error);
+            alert("Failed to upload files. Check the console for details.");
         }
     };
 
     return (
         <div className="upload-page">
-            <h1>Upload Image and Assign Emotions</h1>
+            <h1>Upload Images and Assign Emotions</h1>
             <form onSubmit={handleSubmit}>
                 <div>
-                    <label>Upload Image:</label>
-                    <input type="file" accept="image/*" onChange={handleFileChange} />
+                    <label>Upload Images:</label>
+                    <input type="file" accept="image/*" multiple onChange={handleFilesChange} />
                 </div>
-                <div>
-                    <label>Select Emotions:</label>
-                    <Select
-                        options={emotions}
-                        isMulti
-                        onChange={handleEmotionChange}
-                    />
-                </div>
-                {selectedEmotions.map((emotion) => (
-                    <div key={emotion.value}>
-                        <label>
-                            {emotion.label} Intensity: {intensities[emotion.value]}
-                        </label>
-                        <input
-                            type="range"
-                            min="1"
-                            max="100"
-                            value={intensities[emotion.value]}
-                            onChange={(e) =>
-                                handleIntensityChange(emotion.value, parseInt(e.target.value))
-                            }
+                {filesWithEmotions.map((fileData, index) => (
+                    <div key={index} className="file-item">
+                        <h3>{fileData.file.name}</h3>
+                        <img
+                            src={fileData.previewUrl}
+                            alt={`Preview of ${fileData.file.name}`}
+                            style={{ maxWidth: "200px", maxHeight: "200px", marginBottom: "10px" }}
                         />
+                        <label>Select Emotions:</label>
+                        <Select
+                            options={emotions}
+                            isMulti
+                            onChange={(newValue) => handleEmotionChange(index, newValue)}
+                        />
+                        {fileData.selectedEmotions.map((emotion) => (
+                            <div key={emotion.value}>
+                                <label>
+                                    {emotion.label} Intensity: {fileData.intensities[emotion.value]}
+                                </label>
+                                <input
+                                    type="range"
+                                    min="1"
+                                    max="100"
+                                    value={fileData.intensities[emotion.value]}
+                                    onChange={(e) =>
+                                        handleIntensityChange(index, emotion.value, parseInt(e.target.value))
+                                    }
+                                />
+                            </div>
+                        ))}
                     </div>
                 ))}
-                <button type="submit">Upload</button>
+                <button type="submit">Upload All</button>
             </form>
         </div>
     );
