@@ -58,6 +58,14 @@ const UploadPage: React.FC = () => {
         setFilesWithEmotions(updatedFiles);
     };
 
+    const handleDeleteFile = (index: number) => {
+        const updatedFiles = [...filesWithEmotions];
+        // Видаляємо URL прев'ю, щоб уникнути витоку пам'яті
+        URL.revokeObjectURL(updatedFiles[index].previewUrl);
+        updatedFiles.splice(index, 1); // Видалення файлу зі списку
+        setFilesWithEmotions(updatedFiles);
+    };
+
     const handleSubmit = async (event: FormEvent) => {
         event.preventDefault();
         if (filesWithEmotions.length === 0) {
@@ -115,6 +123,13 @@ const UploadPage: React.FC = () => {
                             alt={`Preview of ${fileData.file.name}`}
                             style={{ maxWidth: "200px", maxHeight: "200px", marginBottom: "10px" }}
                         />
+                        <button
+                            type="button"
+                            onClick={() => handleDeleteFile(index)}
+                            style={{ marginBottom: "10px", color: "red" }}
+                        >
+                            Delete
+                        </button>
                         <label>Select Emotions:</label>
                         <Select
                             options={emotions}
