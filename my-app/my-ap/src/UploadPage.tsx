@@ -30,7 +30,7 @@ const UploadPage: React.FC = () => {
         if (event.target.files) {
             const newFiles = Array.from(event.target.files).map((file) => ({
                 file,
-                previewUrl: URL.createObjectURL(file), // Створення URL для перегляду
+                previewUrl: URL.createObjectURL(file),
                 selectedEmotions: [],
                 intensities: {},
             }));
@@ -60,9 +60,8 @@ const UploadPage: React.FC = () => {
 
     const handleDeleteFile = (index: number) => {
         const updatedFiles = [...filesWithEmotions];
-        // Видаляємо URL прев'ю, щоб уникнути витоку пам'яті
         URL.revokeObjectURL(updatedFiles[index].previewUrl);
-        updatedFiles.splice(index, 1); // Видалення файлу зі списку
+        updatedFiles.splice(index, 1);
         setFilesWithEmotions(updatedFiles);
     };
 
@@ -78,21 +77,18 @@ const UploadPage: React.FC = () => {
                 const formData = new FormData();
                 formData.append("file", file);
 
-                // Завантаження файлу на сервер
                 const s3Response = await axios.post("http://localhost:8080/api/files/upload", formData, {
                     headers: { "Content-Type": "multipart/form-data" },
                 });
 
                 const fileUrl = s3Response.data.url;
 
-                // Створення активу
                 const assetResponse = await axios.post("http://localhost:8080/asset/create-asset", {
                     url: fileUrl,
                     name: file.name,
                 });
                 const assetId = assetResponse.data.id;
 
-                // Додавання емоцій до активу
                 const emotionsWithIntensity = selectedEmotions.map((emotion) => ({
                     emotionName: emotion.label,
                     intensity: intensities[emotion.value],
@@ -107,9 +103,34 @@ const UploadPage: React.FC = () => {
         }
     };
 
+    // Підрахунок кількості емоцій за типами
+    const emotionCount: Record<string, number> = emotions.reduce((acc, emotion) => {
+        acc[emotion.value] = 0;
+        return acc;
+    }, {} as Record<string, number>);
+
+    filesWithEmotions.forEach((file) => {
+        file.selectedEmotions.forEach((emotion) => {
+            emotionCount[emotion.value]++;
+        });
+    });
+
     return (
         <div className="upload-page">
             <h1>Upload Images and Assign Emotions</h1>
+
+            {/* Індикатори */}
+            <div className="indicators">
+                <h2>Emotion Usage:</h2>
+                <ul>
+                    {Object.entries(emotionCount).map(([emotion, count]) => (
+                        <li key={emotion}>
+                            {emotions.find((e) => e.value === emotion)?.label}: {count}
+                        </li>
+                    ))}
+                </ul>
+            </div>
+
             <form onSubmit={handleSubmit}>
                 <div>
                     <label>Upload Images:</label>
