@@ -1,16 +1,10 @@
 package com.ai.hackemotion.emotion;
 
+import lombok.Data;
+
+@Data
 public class EmotionRequest {
     private String emotionName;
-
-    // Default constructor needed for JSON deserialization
-    public EmotionRequest() {}
-
-    public String getEmotionName() {
-        return emotionName;
-    }
-
-    public void setEmotionName(String emotionName) {
-        this.emotionName = emotionName;
-    }
+    private Double intensity;
 }
+

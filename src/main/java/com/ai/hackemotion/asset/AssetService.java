@@ -28,30 +28,26 @@ public class AssetService {
 
     public Asset createAsset(AssetRequest request) {
         Asset asset = Asset.builder()
-                .url(request.getUrl())
                 .name(request.getName())
+                .url(request.getUrl())
                 .build();
+
         return assetRepository.save(asset);
     }
+
 
     public Asset addEmotionsToAsset(String assetId, List<EmotionWithIntensityRequest> emotionsWithIntensity) {
         Asset asset = assetRepository.findById(assetId)
-                .orElseThrow(() -> new RuntimeException("Asset not found with id: " + assetId));
+                .orElseThrow(() -> new RuntimeException("Asset not found"));
 
-        List<EmotionAssignment> assignments = emotionsWithIntensity.stream()
-                .map(request -> {
-                    Emotion emotion = emotionRepository.findByName(request.getEmotionName())
-                            .orElseThrow(() -> new RuntimeException("Emotion not found: " + request.getEmotionName()));
+        emotionsWithIntensity.forEach(request -> {
+            Emotion emotion = emotionRepository.findByName(request.getEmotionName())
+                    .orElseThrow(() -> new RuntimeException("Emotion not found"));
+            asset.getEmotions().add(new EmotionAssignment(emotion, request.getIntensity()));
+        });
 
-                    return EmotionAssignment.builder()
-                            .emotion(emotion)
-                            .intensity(request.getIntensity())
-                            .build();
-                })
-                .collect(Collectors.toList());
-
-        asset.getEmotions().addAll(assignments);
         return assetRepository.save(asset);
     }
+
 
 }

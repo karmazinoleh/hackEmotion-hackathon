@@ -14,5 +14,12 @@ public class EmotionAssignment {
     private String id;
 
     private Emotion emotion;
+
     private double intensity; // 0 ->- 1
+
+    public EmotionAssignment(Emotion emotion, double intensity) {
+        this.emotion = emotion;
+        this.intensity = intensity;
+    }
+
 }

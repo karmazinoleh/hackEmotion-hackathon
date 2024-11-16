@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/files")
@@ -18,18 +20,21 @@ public class FileUploadController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<Map<String, String>> uploadFile(@RequestParam("file") MultipartFile file) {
         try {
             String fileUrl = amazonS3Service.uploadFile(
                     file.getOriginalFilename(),
                     file.getInputStream(),
                     file.getContentType()
             );
-            return ResponseEntity.ok(fileUrl);
+
+            // Повертаємо URL файлу у відповіді
+            Map<String, String> response = new HashMap<>();
+            response.put("url", fileUrl);
+            return ResponseEntity.ok(response);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("File upload failed: " + e.getMessage());
+                    .body(Map.of("message", "File upload failed: " + e.getMessage()));
         }
     }
 }
-
