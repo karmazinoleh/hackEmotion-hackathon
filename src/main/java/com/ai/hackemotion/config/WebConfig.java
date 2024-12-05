@@ -26,7 +26,7 @@ public class WebConfig{
                 .allowCredentials(true);
     }*/
 
-    @Bean
+   /* @Bean
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
@@ -44,6 +44,8 @@ public class WebConfig{
         config.setMaxAge(MAX_AGE);
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
-    }
+    }*/
+
+
 
 }

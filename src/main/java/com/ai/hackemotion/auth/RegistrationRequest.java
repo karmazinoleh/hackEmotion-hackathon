@@ -13,10 +13,10 @@ public class RegistrationRequest {
 
     @NotEmpty(message = "Firstname is empty!")
     @NotBlank(message = "Firstname is empty!")
-    private String firstname;
-    @NotEmpty(message = "Lastname is empty!")
-    @NotBlank(message = "Lastname is empty!")
-    private String lastname;
+    private String username;
+    @NotEmpty(message = "Fullname is empty!")
+    @NotBlank(message = "Fullname is empty!")
+    private String fullName;
     @NotEmpty(message = "Email is empty!")
     @NotBlank(message = "Email is empty!")
     @Email(message = "Wrong format email")

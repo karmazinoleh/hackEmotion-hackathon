@@ -1,6 +1,9 @@
 package com.ai.hackemotion.auth;
 
+import com.ai.hackemotion.email.EmailService;
+import com.ai.hackemotion.email.EmailTemplateName;
 import com.ai.hackemotion.role.RoleRepository;
+import com.ai.hackemotion.security.JwtService;
 import com.ai.hackemotion.user.Token;
 import com.ai.hackemotion.user.TokenRepository;
 import com.ai.hackemotion.user.User;
@@ -39,8 +42,8 @@ public class AuthenticationService {
     public void register(RegistrationRequest request) throws MessagingException {
         var userRole = roleRepository.findByName("USER")
                 .orElseThrow(() -> new IllegalStateException("Role user was not init.!"));
-        var user = User.builder().firstname(request.getFirstname())
-                .lastname(request.getLastname())
+        var user = User.builder().username(request.getUsername())
+                .fullName(request.getFullName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .accountLocked(false)
@@ -56,7 +59,7 @@ public class AuthenticationService {
 
         emailService.sendEmail(
                 user.getEmail(),
-                user.getFullName(),
+                user.getUsername(),
                 EmailTemplateName.ACTIVATE_ACCOUNT,
                 activationUrl,
                 newToken,
@@ -91,7 +94,7 @@ public class AuthenticationService {
         );
         var claims = new HashMap<String, Object>();
         var user = ((User)auth.getPrincipal());
-        claims.put("fullName", user.getFullName());
+        claims.put("fullName", user.getUsername());
         var jwtToken = jwtService.generateToken(claims, user);
         return AuthenticationResponse.builder().token(jwtToken).build();
     }
@@ -104,7 +107,7 @@ public class AuthenticationService {
             throw new RuntimeException("Activation token has expired. A new token has been send to the same email address");
         }
 
-        var user = userRepository.findById(savedToken.getUser().getId())
+        var user = userRepository.findById(String.valueOf(savedToken.getUser().getId()))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         user.setEnabled(true);
         userRepository.save(user);
