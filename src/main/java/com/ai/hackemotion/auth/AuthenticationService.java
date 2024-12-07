@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -93,8 +94,8 @@ public class AuthenticationService {
                         request.getPassword())
         );
         var claims = new HashMap<String, Object>();
-        var user = auth.getPrincipal(); // Object??
-        claims.put("fullName", user.getUsername());
+        var user = ((UserDetails)auth.getPrincipal()); // (User) in origin, could be a problem(!)
+        claims.put("username", user.getUsername());
         var jwtToken = jwtService.generateToken(claims, user);
         return AuthenticationResponse.builder().token(jwtToken).build();
     }
