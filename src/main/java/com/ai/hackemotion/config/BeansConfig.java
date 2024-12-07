@@ -13,7 +13,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,7 +43,7 @@ public class BeansConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
+    /*@Bean
     public CorsFilter corsFilter() {
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         final CorsConfiguration config = new CorsConfiguration();
@@ -65,5 +65,5 @@ public class BeansConfig {
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
 
-    }
+    }*/
 }
