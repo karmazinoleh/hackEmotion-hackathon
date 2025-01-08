@@ -47,7 +47,8 @@ public class EmailService {
         );
         Map<String, Object> properties = new HashMap<>();
         properties.put("username", username);
-        properties.put("confirmationUrl", confirmationUrl);
+        //properties.put("confirmationUrl", confirmationUrl);
+        properties.put("confirmationUrl", "localhost:8088/auth/activate-account" + activationCode);
         properties.put("activation_code", activationCode);
 
         Context context = new Context();

@@ -26,7 +26,7 @@ public class SecurityConfig {
     private final JwtFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
 
-    @Bean
+   /* @Bean
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception{
         http.cors(withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
@@ -48,6 +48,20 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
 
-    }
+    }*/
+   @Bean
+   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+       http.csrf(AbstractHttpConfigurer::disable)
+               .authorizeHttpRequests(auth -> auth
+               .requestMatchers("/auth/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**").permitAll()
+               .anyRequest().authenticated())
+       .sessionManagement(session -> session
+               .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+               .authenticationProvider(authenticationProvider)
+               .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+       return http.build();
+   }
 
 }
