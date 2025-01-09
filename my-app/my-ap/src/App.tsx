@@ -4,6 +4,7 @@ import {BrowserRouter, Route, Routes} from "react-router-dom";
 import PrivateRoute from "./PrivateRoute.tsx";
 import LoginPage from "./components/LoginPage.tsx";
 import RegisterPage from "./components/RegisterPage.tsx";
+import ActivateAccountPage from "./components/ActivateAccountPage.tsx";
 
 const App: React.FC = () => {
     return (
@@ -11,6 +12,7 @@ const App: React.FC = () => {
             <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
+                <Route path="/activate-account" element={<ActivateAccountPage />} />
                 <Route
                     path="/"
                     element={

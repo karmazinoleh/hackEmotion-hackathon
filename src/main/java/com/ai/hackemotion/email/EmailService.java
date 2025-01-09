@@ -47,14 +47,14 @@ public class EmailService {
         );
         Map<String, Object> properties = new HashMap<>();
         properties.put("username", username);
-        //properties.put("confirmationUrl", confirmationUrl);
-        properties.put("confirmationUrl", "localhost:8088/auth/activate-account" + activationCode);
+        properties.put("confirmationUrl", confirmationUrl);
+        //properties.put("confirmationUrl", "localhost:8088/auth/activate-account" + activationCode);
         properties.put("activation_code", activationCode);
 
         Context context = new Context();
         context.setVariables(properties);
 
-        helper.setFrom("contact@aliboucoding.com");
+        helper.setFrom("contact@example.com");
         helper.setTo(to);
         helper.setSubject(subject);
 
