@@ -32,4 +32,6 @@ public class Asset {
 
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    private Long authorId;
 }

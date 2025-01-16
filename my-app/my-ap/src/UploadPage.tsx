@@ -7,11 +7,19 @@ type EmotionOption = {
     label: string;
 };
 
+type BoundingBox = {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+};
+
 type FileWithEmotions = {
     file: File;
     previewUrl: string;
     selectedEmotions: EmotionOption[];
     intensities: Record<string, number>;
+    boundingBoxes: BoundingBox[]; // coordinates
 };
 
 const emotions: EmotionOption[] = [
@@ -33,10 +41,12 @@ const UploadPage: React.FC = () => {
                 previewUrl: URL.createObjectURL(file),
                 selectedEmotions: [],
                 intensities: {},
+                boundingBoxes: [],
             }));
             setFilesWithEmotions([...filesWithEmotions, ...newFiles]);
         }
     };
+
 
     const handleEmotionChange = (index: number, newValue: MultiValue<EmotionOption>) => {
         const updatedFiles = [...filesWithEmotions];
@@ -46,7 +56,7 @@ const UploadPage: React.FC = () => {
         // Ініціалізація інтенсивностей для кожної емоції
         const initialIntensities: Record<string, number> = {};
         selected.forEach((option) => {
-            initialIntensities[option.value] = 50;
+            initialIntensities[option.value] = 5;
         });
         updatedFiles[index].intensities = initialIntensities;
         setFilesWithEmotions(updatedFiles);
@@ -165,7 +175,7 @@ const UploadPage: React.FC = () => {
                                 <input
                                     type="range"
                                     min="1"
-                                    max="100"
+                                    max="5"
                                     value={fileData.intensities[emotion.value]}
                                     onChange={(e) =>
                                         handleIntensityChange(index, emotion.value, parseInt(e.target.value))
