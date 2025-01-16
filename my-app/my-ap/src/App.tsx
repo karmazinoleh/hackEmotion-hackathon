@@ -5,6 +5,8 @@ import PrivateRoute from "./PrivateRoute.tsx";
 import LoginPage from "./components/LoginPage.tsx";
 import RegisterPage from "./components/RegisterPage.tsx";
 import ActivateAccountPage from "./components/ActivateAccountPage.tsx";
+import Hello from "./components/hello/Hello.tsx";
+
 
 const App: React.FC = () => {
     return (
@@ -21,6 +23,7 @@ const App: React.FC = () => {
                         </PrivateRoute>
                     }
                 />
+                <Route path="/hello" element={<Hello userName={"Oleh"} />} />
             </Routes>
         </BrowserRouter>
     );
