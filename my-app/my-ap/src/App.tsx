@@ -1,11 +1,12 @@
 import React from "react";
-import UploadPage from "./UploadPage.tsx";
+import UploadPage from "./pages/UploadPage.tsx";
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 import PrivateRoute from "./PrivateRoute.tsx";
-import LoginPage from "./components/LoginPage.tsx";
-import RegisterPage from "./components/RegisterPage.tsx";
-import ActivateAccountPage from "./components/ActivateAccountPage.tsx";
+import LoginPage from "./pages/LoginPage.tsx";
+import RegisterPage from "./pages/RegisterPage.tsx";
+import ActivateAccountPage from "./pages/ActivateAccountPage.tsx";
 import Hello from "./components/hello/Hello.tsx";
+import AuthWrapper from "./components/AuthWrapper.tsx";
 
 
 const App: React.FC = () => {
@@ -19,7 +20,9 @@ const App: React.FC = () => {
                     path="/"
                     element={
                         <PrivateRoute>
-                            <UploadPage />
+                            <AuthWrapper>
+                                <UploadPage />
+                            </AuthWrapper>
                         </PrivateRoute>
                     }
                 />

@@ -20,9 +20,23 @@ const LoginPage: React.FC = () => {
     return (
         <div>
             <h1>Login</h1>
-            <input type="text" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" />
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" />
+            <input type="text" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email"/>
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password"/>
             <button onClick={handleLogin}>Login</button>
+
+            <button
+                onClick={() => navigate('/register')}
+                style={{
+                    padding: '10px 20px',
+                    backgroundColor: '#007bff',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer'
+                }}
+            >
+                Go to Register Page
+            </button>
         </div>
     );
 };

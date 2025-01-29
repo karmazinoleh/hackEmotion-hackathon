@@ -65,6 +65,19 @@ const RegisterPage: React.FC = () => {
                 placeholder="Confirm Password"
             />
             <button onClick={handleRegister}>Register</button>
+            <button
+                onClick={() => navigate('/login')}
+                style={{
+                    padding: '10px 20px',
+                    backgroundColor: '#007bff',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer'
+                }}
+            >
+                Go to Login Page
+            </button>
         </div>
     );
 };
