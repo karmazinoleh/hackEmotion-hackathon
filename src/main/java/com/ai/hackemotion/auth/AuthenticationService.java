@@ -2,6 +2,7 @@ package com.ai.hackemotion.auth;
 
 import com.ai.hackemotion.email.EmailService;
 import com.ai.hackemotion.email.EmailTemplateName;
+import com.ai.hackemotion.rating.RatingService;
 import com.ai.hackemotion.role.RoleRepository;
 import com.ai.hackemotion.security.JwtService;
 import com.ai.hackemotion.user.Token;
@@ -12,6 +13,7 @@ import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -38,6 +40,8 @@ public class AuthenticationService {
 
     @Value("${application.mailing.frontend.activation-url}")
     private String activationUrl;
+    @Autowired
+    private RatingService rating;
 
 
     public void register(RegistrationRequest request) throws MessagingException {
@@ -49,6 +53,9 @@ public class AuthenticationService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .accountLocked(false)
                 .enabled(false)
+                .score(0)
+                .datasetsUploaded(0)
+                .datasetsRated(0)
                 .roleList(List.of(userRole))
                 .build();
         userRepository.save(user);
@@ -97,6 +104,8 @@ public class AuthenticationService {
         var user = ((UserDetails)auth.getPrincipal()); // (User) in origin, could be a problem(!)
         claims.put("username", user.getUsername());
         var jwtToken = jwtService.generateToken(claims, user);
+        User user_to_save = rating.updateScore((User) auth.getPrincipal(), 1); // BIG SHIT
+        userRepository.save(user_to_save);                                                // THIS ONE TOO, BUT I AM DUMB TODAY :(
         return AuthenticationResponse.builder().token(jwtToken).build();
     }
 

@@ -3,7 +3,6 @@ package com.ai.hackemotion.user;
 import com.ai.hackemotion.role.Role;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -52,11 +51,16 @@ public class User implements UserDetails {
     )
     private List<Role> roleList;
 
+    private int score;
+    private int datasetsUploaded;
+    private int datasetsRated;
+
     //@Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.roleList.stream().map
                         (role -> new SimpleGrantedAuthority(role.getName()))
                 .collect(Collectors.toList());
     }
+
 
 }
