@@ -53,7 +53,7 @@ public class AuthenticationService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .accountLocked(false)
                 .enabled(false)
-                .score(0)
+                //.score(0)
                 .datasetsUploaded(0)
                 .datasetsRated(0)
                 .roleList(List.of(userRole))
@@ -101,11 +101,10 @@ public class AuthenticationService {
                         request.getPassword())
         );
         var claims = new HashMap<String, Object>();
-        var user = ((UserDetails)auth.getPrincipal()); // (User) in origin, could be a problem(!)
+        var user = ((UserDetails)auth.getPrincipal());
         claims.put("username", user.getUsername());
         var jwtToken = jwtService.generateToken(claims, user);
-        User user_to_save = rating.updateScore((User) auth.getPrincipal(), 1); // BIG SHIT
-        userRepository.save(user_to_save);                                                // THIS ONE TOO, BUT I AM DUMB TODAY :(
+        rating.updateScore((User) auth.getPrincipal(), 5); // Should work?
         return AuthenticationResponse.builder().token(jwtToken).build();
     }
 

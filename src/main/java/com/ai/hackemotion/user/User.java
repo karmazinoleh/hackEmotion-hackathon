@@ -51,7 +51,7 @@ public class User implements UserDetails {
     )
     private List<Role> roleList;
 
-    private int score;
+    //private int score;
     private int datasetsUploaded;
     private int datasetsRated;
 
