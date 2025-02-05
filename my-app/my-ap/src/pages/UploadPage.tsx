@@ -87,13 +87,13 @@ const UploadPage: React.FC = () => {
                 const formData = new FormData();
                 formData.append("file", file);
 
-                const s3Response = await axios.post("http://localhost:8080/api/files/upload", formData, {
+                const s3Response = await axios.post("http://localhost:8088/api/files/upload", formData, {
                     headers: { "Content-Type": "multipart/form-data" },
                 });
 
                 const fileUrl = s3Response.data.url;
 
-                const assetResponse = await axios.post("http://localhost:8080/asset/create-asset", {
+                const assetResponse = await axios.post("http://localhost:8088/asset/create-asset", {
                     url: fileUrl,
                     name: file.name,
                 });
@@ -103,7 +103,7 @@ const UploadPage: React.FC = () => {
                     emotionName: emotion.label,
                     intensity: intensities[emotion.value],
                 }));
-                await axios.post(`http://localhost:8080/asset/${assetId}/add-emotions`, emotionsWithIntensity);
+                await axios.post(`http://localhost:8088/asset/${assetId}/add-emotions`, emotionsWithIntensity);
             }
 
             alert("Files uploaded successfully with emotions!");
