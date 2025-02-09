@@ -1,9 +1,11 @@
 package com.ai.hackemotion.asset;
 
+import com.ai.hackemotion.emotion.Emotion;
+import com.ai.hackemotion.emotion.EmotionRequest;
+import com.ai.hackemotion.emotion.EmotionService;
+import com.ai.hackemotion.user.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 import java.util.List;
 
@@ -11,16 +13,18 @@ import java.util.List;
 @RequestMapping("asset")
 public class AssetController {
     private final AssetService assetService;
+    private final EmotionService service;
 
-    public AssetController(AssetService assetService) {
+    public AssetController(AssetService assetService, EmotionService request, EmotionService service) {
         this.assetService = assetService;
+        this.service = service;
     }
 
     @PostMapping("/{assetId}/add-emotions")
     public ResponseEntity<Asset> addEmotions(
-            @PathVariable String assetId,
-            @RequestBody List<EmotionWithIntensityRequest> emotionsWithIntensity) {
-        return ResponseEntity.ok(assetService.addEmotionsToAsset(assetId, emotionsWithIntensity));
+            @PathVariable Long assetId,
+            @RequestBody EmotionRequest request) {
+        return ResponseEntity.ok(assetService.addEmotionsToAsset(assetId, request));
     }
 
     @PostMapping("/create-asset")
@@ -29,8 +33,8 @@ public class AssetController {
     }
 
     @GetMapping("/{assetId}/emotions")
-    public ResponseEntity<List<String>> getEmotionsWithIntensityByAssetId(@PathVariable String assetId) {
-        return ResponseEntity.ok(assetService.getEmotionNamesWithIntensityByAssetId(assetId));
+    public ResponseEntity<List<String>> getEmotionsByAssetId(@PathVariable Long assetId) {
+        return ResponseEntity.ok(assetService.getEmotionNamesByAssetId(assetId));
     }
 
 

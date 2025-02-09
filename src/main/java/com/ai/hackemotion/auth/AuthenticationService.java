@@ -102,6 +102,8 @@ public class AuthenticationService {
         );
         var claims = new HashMap<String, Object>();
         var user = ((UserDetails)auth.getPrincipal());
+        //var user = userRepository.findByEmail(request.getEmail())
+        //        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         claims.put("username", user.getUsername());
         var jwtToken = jwtService.generateToken(claims, user);
         rating.updateScore((User) auth.getPrincipal(), 5); // Should work?

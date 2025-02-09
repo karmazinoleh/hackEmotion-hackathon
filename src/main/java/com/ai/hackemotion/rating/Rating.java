@@ -23,4 +23,5 @@ public class Rating {
     private int score;
 
     private int rank;
+
 }

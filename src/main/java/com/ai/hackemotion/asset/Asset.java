@@ -1,37 +1,33 @@
 package com.ai.hackemotion.asset;
 
-import com.ai.hackemotion.emotion.Emotion;
+import com.ai.hackemotion.user.User;
+import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.DocumentReference;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
+@Entity
+@Table(name = "asset")
 @Getter
 @Setter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
-@Document(collection = "assets")
+@AllArgsConstructor
+@Builder
 public class Asset {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String url;
 
     private String name;
-
-    @Builder.Default
-    private Set<EmotionAssignment> emotions = new HashSet<>();
 
     private LocalDateTime localDateTime;
 
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    private Long authorId;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 }
