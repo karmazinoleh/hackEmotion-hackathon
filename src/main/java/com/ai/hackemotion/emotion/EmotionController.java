@@ -13,7 +13,7 @@ public class EmotionController {
 
     @PostMapping("add")
     public String addEmotion(@RequestBody EmotionRequest request) {
-        emotionService.addEmotion(request.getEmotionName());
+        //emotionService.addEmotion(request.getEmotions()[0]);
         return "Emotion was created!";
     }
 }

@@ -1,0 +1,13 @@
+.welcome-back-container {
+    padding: 20px;
+    background-color: #333;
+    color: white;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.welcome-back-container .username {
+    color: #00ffcc;
+    font-weight: bold;
+}

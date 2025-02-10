@@ -1,10 +1,15 @@
 import React from "react";
-import UploadPage from "./UploadPage.tsx";
+//import UploadPage from "./pages/UploadPage.tsx";
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 import PrivateRoute from "./PrivateRoute.tsx";
-import LoginPage from "./components/LoginPage.tsx";
-import RegisterPage from "./components/RegisterPage.tsx";
-import ActivateAccountPage from "./components/ActivateAccountPage.tsx";
+import LoginPage from "./pages/LoginPage.tsx";
+import RegisterPage from "./pages/RegisterPage.tsx";
+import ActivateAccountPage from "./pages/ActivateAccountPage.tsx";
+import AuthWrapper from "./components/AuthWrapper.tsx";
+import MainPage from "./pages/MainPage.tsx";
+import UploadPage from "./pages/UploadPage.tsx";
+import MyAssetsPage from "./pages/MyAssetsPage.tsx";
+
 
 const App: React.FC = () => {
     return (
@@ -17,10 +22,35 @@ const App: React.FC = () => {
                     path="/"
                     element={
                         <PrivateRoute>
-                            <UploadPage />
+                            <AuthWrapper>
+                                <MainPage/>
+                            </AuthWrapper>
+                       </PrivateRoute>
+                    }
+                />
+
+                <Route
+                    path="/my-assets"
+                    element={
+                        <PrivateRoute>
+                            <AuthWrapper>
+                                <MyAssetsPage/>
+                            </AuthWrapper>
                         </PrivateRoute>
                     }
                 />
+
+                <Route
+                    path="/upload-emotions"
+                    element={
+                        <PrivateRoute>
+                            <AuthWrapper>
+                                <UploadPage/>
+                            </AuthWrapper>
+                        </PrivateRoute>
+                    }
+                />
+
             </Routes>
         </BrowserRouter>
     );
