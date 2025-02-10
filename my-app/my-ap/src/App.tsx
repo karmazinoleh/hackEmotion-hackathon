@@ -8,6 +8,7 @@ import ActivateAccountPage from "./pages/ActivateAccountPage.tsx";
 import AuthWrapper from "./components/AuthWrapper.tsx";
 import MainPage from "./pages/MainPage.tsx";
 import UploadPage from "./pages/UploadPage.tsx";
+import MyAssetsPage from "./pages/MyAssetsPage.tsx";
 
 
 const App: React.FC = () => {
@@ -17,18 +18,39 @@ const App: React.FC = () => {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/activate-account" element={<ActivateAccountPage />} />
-                <Route path="/upload-emotions" element={<UploadPage />} />
                 <Route
                     path="/"
                     element={
                         <PrivateRoute>
                             <AuthWrapper>
-                                {/*<UploadPage />*/}
                                 <MainPage/>
                             </AuthWrapper>
                        </PrivateRoute>
                     }
                 />
+
+                <Route
+                    path="/my-assets"
+                    element={
+                        <PrivateRoute>
+                            <AuthWrapper>
+                                <MyAssetsPage/>
+                            </AuthWrapper>
+                        </PrivateRoute>
+                    }
+                />
+
+                <Route
+                    path="/upload-emotions"
+                    element={
+                        <PrivateRoute>
+                            <AuthWrapper>
+                                <UploadPage/>
+                            </AuthWrapper>
+                        </PrivateRoute>
+                    }
+                />
+
             </Routes>
         </BrowserRouter>
     );
