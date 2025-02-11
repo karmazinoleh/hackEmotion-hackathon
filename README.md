@@ -8,7 +8,6 @@
 
 ### 📝 Planned to be implemented:
 - [ ] Ability to export datasets for further AI training.
-- [ ] Creation of author's emotions and other parameters.
 - [ ] A smart system for selecting final parameters: each participant will be able to evaluate the image and choose the right emotions, in their opinion. The final calculation will summarize and select the most likely emotion (the one most often chosen by other users).
 - [ ] Advanced rating system: getting points for rating images, uploading images.
 
