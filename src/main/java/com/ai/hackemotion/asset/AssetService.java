@@ -28,12 +28,12 @@ public class AssetService {
         this.userRepository = userRepository;
     }
 
-    public List<String> getEmotionNamesByAssetId(Long assetId) {
+    /*public List<String> getEmotionNamesByAssetId(Long assetId) {
         Asset asset = assetRepository.findById(assetId)
                 .orElseThrow(() -> new RuntimeException("Asset not found with id: " + assetId));
 
         return userAssetEmotionRepository.findEmotionsByAssetId(asset.getId());
-    }
+    }*/
 
     public Asset createAsset(AssetRequest request) {
         User user = userRepository.findByUsername(request.getUsername())
@@ -53,7 +53,7 @@ public class AssetService {
         Asset asset = assetRepository.findById(assetId)
                 .orElseThrow(() -> new RuntimeException("Asset not found"));
 
-        User user_test = userRepository.findByEmail("westwest@gmail.com")
+        User user = userRepository.findByUsername(request.getUser().getUsername())
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         for (Emotion emotion : request.getEmotions()) {
@@ -61,7 +61,7 @@ public class AssetService {
                     .orElseThrow(() -> new RuntimeException("Emotion not found: " + emotion.getId()));
 
             UserAssetEmotion userAssetEmotion = UserAssetEmotion.builder()
-                    .user(user_test)
+                    .user(user)
                     .asset(asset)
                     .emotion(existingEmotion)
                     .build();

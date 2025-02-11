@@ -12,6 +12,7 @@ const LevelBanner: React.FC = () => {
             <button onClick={() => navigate('/my-profile')}>My profile</button>
             <button onClick={() => navigate('/settings')}>Settings</button>
             <button onClick={() => navigate('/my-assets')}>My assets</button>
+            <button onClick={() => navigate('/')}>Home</button>
         </div>
     );
 };
