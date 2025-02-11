@@ -7,9 +7,9 @@
 - [x] Store them in your S3 storage.
 
 ### 📝 Planned to be implemented:
-- [ ] Ability to export datasets for further AI training.
-- [ ] A smart system for selecting final parameters: each participant will be able to evaluate the image and choose the right emotions, in their opinion. The final calculation will summarize and select the most likely emotion (the one most often chosen by other users).
-- [ ] Advanced rating system: getting points for rating images, uploading images.
+- [ ] #7
+- [ ] #8 A smart system for selecting final parameters: each participant will be able to evaluate the image and choose the right emotions, in their opinion. The final calculation will summarize and select the most likely emotion (the one most often chosen by other users).
+- [ ] #9 Advanced rating system: getting points for rating and uploading images.
 
 ## 🚀 Get Started
 1. Make sure you installed [npm](https://www.npmjs.com/) and docker!
