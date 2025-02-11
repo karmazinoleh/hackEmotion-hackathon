@@ -12,7 +12,7 @@
 - [ ] A smart system for selecting final parameters: each participant will be able to evaluate the image and choose the right emotions, in their opinion. The final calculation will summarize and select the most likely emotion (the one most often chosen by other users).
 - [ ] Advanced rating system: getting points for rating images, uploading images.
 
-## Get Started
+## 🚀 Get Started
 1. Make sure you installed [npm](https://www.npmjs.com/) and docker!
 2. Go to the project's core folder and run ``` docker compose up ```.
 3. Run Spring Boot project.
