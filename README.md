@@ -13,13 +13,13 @@
 
 ## 🚀 Get Started
 1. Make sure you installed [npm](https://www.npmjs.com/) and docker!
-2. Go to the project's core folder and run ``` docker compose up ```.
-3. Run Spring Boot project.
-4. Run pgAdmin4 with DB named hackemotions (or change name in properties).
-5. Look at *src/main/resources/application-example.properties* and enter your s3 keys.
-6. Go to */my-app/my-ap* and run ``` run npm dev ```.
-7. Enter *http://localhost:5173/* and register new account.
-8. Activate account at *http://localhost:1080/*.
+2. Look at *src/main/resources/application-example.properties* and enter your s3 keys.
+3. Go to the project's core folder and run ``` docker compose up ```.
+4. Run Spring Boot project.
+5. Run pgAdmin4 with DB named hackemotions (or change name in properties).
+7. Go to */my-app/my-ap* and run ``` run npm dev ```.
+8. Enter *http://localhost:5173/* and register new account.
+9. Activate account at *http://localhost:1080/*.
 
 
 > Project was created for **HackEmotion** hackathon (16-17 November 2024) in Katowice, improved after the competition.
