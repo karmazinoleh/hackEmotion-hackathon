@@ -1,5 +1,7 @@
 package com.ai.hackemotion.emotion;
 
+import com.ai.hackemotion.asset.Asset;
+import com.ai.hackemotion.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -12,4 +14,7 @@ public interface UserAssetEmotionRepository extends JpaRepository<UserAssetEmoti
     public List<UserAssetEmotion> findAllByUserId(Long userId);
 
     List<UserAssetEmotion> findAllByAssetId(Long assetId);
+
+    List<UserAssetEmotion> findAllByUserIdNot (Long userId);
+    boolean existsByUserIdAndAssetId(Long userId, Long assetId);
 }
