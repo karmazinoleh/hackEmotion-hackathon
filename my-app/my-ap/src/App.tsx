@@ -9,6 +9,7 @@ import AuthWrapper from "./components/AuthWrapper.tsx";
 import MainPage from "./pages/MainPage.tsx";
 import UploadPage from "./pages/UploadPage.tsx";
 import MyAssetsPage from "./pages/MyAssetsPage.tsx";
+import RatePage from "./pages/RatePage.tsx";
 
 
 const App: React.FC = () => {
@@ -35,6 +36,17 @@ const App: React.FC = () => {
                         <PrivateRoute>
                             <AuthWrapper>
                                 <MyAssetsPage/>
+                            </AuthWrapper>
+                        </PrivateRoute>
+                    }
+                />
+
+                <Route
+                    path="/rate"
+                    element={
+                        <PrivateRoute>
+                            <AuthWrapper>
+                                <RatePage/>
                             </AuthWrapper>
                         </PrivateRoute>
                     }
