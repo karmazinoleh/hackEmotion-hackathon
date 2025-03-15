@@ -100,7 +100,6 @@ public class AssetController {
 
         return ResponseEntity.ok(response);
     }
-    // todo: add security check – if user tries to rate asset he already rated
     @PostMapping("/rate/{username}")
     public ResponseEntity<String> voteForEmotion(@PathVariable String username, @RequestBody VoteRequest voteRequest) {
         User user = userRepository.findByUsername(username)
