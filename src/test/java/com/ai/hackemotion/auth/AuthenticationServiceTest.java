@@ -5,6 +5,7 @@ import com.ai.hackemotion.email.EmailTemplateName;
 import com.ai.hackemotion.role.Role;
 import com.ai.hackemotion.role.RoleRepository;
 import com.ai.hackemotion.security.JwtService;
+import com.ai.hackemotion.user.Token;
 import com.ai.hackemotion.user.TokenRepository;
 import com.ai.hackemotion.user.User;
 import com.ai.hackemotion.user.UserRepository;
@@ -18,10 +19,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.management.InstanceAlreadyExistsException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,11 +58,21 @@ class AuthenticationServiceTest {
 
 
     private Role userRole;
+    private User user;
     private RegistrationRequest registrationRequest;
+    private AuthenticationRequest authenticationRequest;
     private final String ENCODED_PASSWORD = "encodedPassword";
+    private final String AUTH_TOKEN = "autenticationToken";
 
     @BeforeEach
     void setUp() {
+        this.user = new User();
+        user.setId(1L);
+        user.setUsername("username");
+        user.setPassword(ENCODED_PASSWORD);
+        user.setEmail("email@email.com");
+        user.setEnabled(false);
+
         userRole = Role.builder()
                 .id(1L)
                 .name("USER")
@@ -66,6 +83,10 @@ class AuthenticationServiceTest {
         registrationRequest.setPassword("password");
         registrationRequest.setEmail("test@email.com");
         registrationRequest.setFullName("Test User");
+
+        authenticationRequest = new AuthenticationRequest();
+        authenticationRequest.setEmail("test@email.com");
+        authenticationRequest.setPassword("password");
 
         ReflectionTestUtils.setField(authenticationService, "activationUrl", "http://localhost:3000/activate");
     }
@@ -163,10 +184,98 @@ class AuthenticationServiceTest {
     }
 
     @Test
-    void authenticate() {
+    void authenticate_Success(){
+
+        // Arrange:
+        var userDetails = User.builder().email("test@email.com").password("password").build();
+        var authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, "password");
+
+        when(authenticationManager.authenticate(any())).thenReturn(authenticationToken);
+
+        var claims = new HashMap<String, Object>();
+        claims.put("username", userDetails.getUsername());
+        when(jwtService.generateToken(claims, userDetails)).thenReturn(AUTH_TOKEN);
+
+        // Act
+        AuthenticationResponse response = authenticationService.authenticate(authenticationRequest);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(AUTH_TOKEN, response.getToken());
     }
 
     @Test
-    void activateAccount() {
+    void authenticate_BadCredentials(){
+        // Arrange
+        doThrow(new BadCredentialsException("Bad credentials")).when(authenticationManager).authenticate(any());
+
+        // Act
+        BadCredentialsException exception = assertThrows(BadCredentialsException.class, () -> {
+            authenticationService.authenticate(authenticationRequest);
+        });
+
+        // Assert
+        assertEquals("Bad credentials", exception.getMessage());
+    }
+
+    @Test
+    void activateAccount_Success() throws MessagingException {
+        // Arrange
+        var token = Token.builder()
+                        .token("activateAccountToken")
+                        .createdAt(LocalDateTime.now().minusMinutes(5))
+                        .expiresAt(LocalDateTime.now().plusMinutes(5))
+                        .user(user)
+                        .build();
+
+        when(tokenRepository.findByToken("activateAccountToken")).thenReturn(Optional.ofNullable(token));
+        when(userRepository.findById("1")).thenReturn(Optional.of(user));
+
+        // Act
+        authenticationService.activateAccount("activateAccountToken");
+
+        // Assert
+        assertTrue(user.isEnabled());
+        assertNotNull(token.getValidatedAt());
+
+        verify(userRepository).save(user);
+        verify(tokenRepository).save(token);
+    }
+
+    @Test
+    void activateAccount_ExpiredToken() throws RuntimeException {
+        // Arrange
+        var token = Token.builder()
+                .token("activateAccountToken")
+                .createdAt(LocalDateTime.now().minusMinutes(5))
+                .expiresAt(LocalDateTime.now().minusMinutes(1))
+                .user(user)
+                .build();
+
+        when(tokenRepository.findByToken("activateAccountToken")).thenReturn(Optional.ofNullable(token));
+
+        // Act
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            authenticationService.activateAccount("activateAccountToken");
+        });
+
+        // Assert
+        assertEquals("Activation token has expired. A new token has been send to the same email address", exception.getMessage());
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void activateAccount_InvalidToken() throws RuntimeException {
+        // Arrange
+        when(tokenRepository.findByToken("activateAccountToken")).thenReturn(Optional.empty());
+
+        // Act
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            authenticationService.activateAccount("activateAccountToken");
+        });
+
+        // Assert
+        verify(userRepository, never()).save(any(User.class));
+        verify(tokenRepository, never()).save(any(Token.class));
     }
 }
