@@ -56,7 +56,6 @@ class AuthenticationServiceTest {
     @InjectMocks
     private AuthenticationService authenticationService;
 
-
     private Role userRole;
     private User user;
     private RegistrationRequest registrationRequest;
