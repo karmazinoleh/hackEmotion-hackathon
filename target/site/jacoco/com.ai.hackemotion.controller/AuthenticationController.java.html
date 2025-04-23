@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthenticationController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">hackemotion</a> &gt; <a href="index.source.html" class="el_package">com.ai.hackemotion.controller</a> &gt; <span class="el_source">AuthenticationController.java</span></div><h1>AuthenticationController.java</h1><pre class="source lang-java linenums">package com.ai.hackemotion.controller;
+
+import com.ai.hackemotion.dto.request.AuthenticationRequest;
+import com.ai.hackemotion.dto.response.AuthenticationResponse;
+import com.ai.hackemotion.service.impl.AuthenticationServiceImpl;
+import com.ai.hackemotion.dto.request.RegistrationRequest;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.mail.MessagingException;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import javax.management.InstanceAlreadyExistsException;
+
+@RestController
+@RequestMapping(&quot;auth&quot;)
+@RequiredArgsConstructor
+@Tag(name = &quot;Authentication&quot;)
+public class AuthenticationController {
+
+    private final AuthenticationServiceImpl service;
+
+    @PostMapping(&quot;/register&quot;)
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ResponseEntity&lt;?&gt; register(
+            @RequestBody @Valid RegistrationRequest request
+    ) throws MessagingException, InstanceAlreadyExistsException {
+<span class="nc" id="L30">        service.register(request);</span>
+<span class="nc" id="L31">        return ResponseEntity.accepted().build();</span>
+    }
+
+    @PostMapping(&quot;/authenticate&quot;)
+    public ResponseEntity&lt;AuthenticationResponse&gt; authenticate(
+            @RequestBody @Valid AuthenticationRequest request
+    ){
+<span class="nc" id="L38">        return ResponseEntity.ok(service.authenticate(request));</span>
+    }
+
+    @GetMapping(&quot;/activate-account&quot;)
+    public void confirm(
+            @RequestParam String token
+    ) throws MessagingException {
+<span class="nc" id="L45">        service.activateAccount(token);</span>
+<span class="nc" id="L46">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
