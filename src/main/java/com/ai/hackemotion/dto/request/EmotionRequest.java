@@ -1,4 +1,4 @@
-package com.ai.hackemotion.dto;
+package com.ai.hackemotion.dto.request;
 
 import com.ai.hackemotion.entity.Emotion;
 import com.ai.hackemotion.entity.User;

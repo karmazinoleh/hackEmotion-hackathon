@@ -1,4 +1,4 @@
-package com.ai.hackemotion.dto;
+package com.ai.hackemotion.dto.request;
 
 import com.ai.hackemotion.entity.Emotion;
 import lombok.*;
@@ -10,7 +10,7 @@ import org.springframework.data.annotation.Id;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class EmotionAssignment {
+public class EmotionAssignmentRequest {
     @Id
     private String id;
 
@@ -18,7 +18,7 @@ public class EmotionAssignment {
 
     private double intensity; // 0 ->- 1
 
-    public EmotionAssignment(Emotion emotion, double intensity) {
+    public EmotionAssignmentRequest(Emotion emotion, double intensity) {
         this.emotion = emotion;
         this.intensity = intensity;
     }

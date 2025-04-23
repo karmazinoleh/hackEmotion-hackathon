@@ -1,4 +1,4 @@
-package com.ai.hackemotion.service;
+package com.ai.hackemotion.security.service;
 
 import io.jsonwebtoken.Claims;
 import org.springframework.security.core.userdetails.UserDetails;

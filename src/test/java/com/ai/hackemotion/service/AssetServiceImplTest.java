@@ -1,7 +1,7 @@
-package com.ai.hackemotion.asset;
+package com.ai.hackemotion.service;
 
-import com.ai.hackemotion.dto.AssetRequest;
-import com.ai.hackemotion.dto.EmotionRequest;
+import com.ai.hackemotion.dto.request.AssetRequest;
+import com.ai.hackemotion.dto.request.EmotionRequest;
 import com.ai.hackemotion.entity.Asset;
 import com.ai.hackemotion.entity.Emotion;
 import com.ai.hackemotion.entity.UserAssetEmotion;

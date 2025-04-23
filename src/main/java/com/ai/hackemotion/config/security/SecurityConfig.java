@@ -1,6 +1,6 @@
-package com.ai.hackemotion.config;
+package com.ai.hackemotion.config.security;
 
-import com.ai.hackemotion.security.JwtFilter;
+import com.ai.hackemotion.security.filter.JwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;

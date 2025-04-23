@@ -1,6 +1,6 @@
-package com.ai.hackemotion.service.impl;
+package com.ai.hackemotion.security.service.impl;
 
-import com.ai.hackemotion.service.JwtService;
+import com.ai.hackemotion.security.service.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;

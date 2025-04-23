@@ -1,11 +1,11 @@
 package com.ai.hackemotion.service.impl;
 
 import com.ai.hackemotion.entity.Asset;
-import com.ai.hackemotion.dto.AssetRequest;
+import com.ai.hackemotion.dto.request.AssetRequest;
 import com.ai.hackemotion.entity.Emotion;
 import com.ai.hackemotion.repository.AssetRepository;
 import com.ai.hackemotion.repository.EmotionRepository;
-import com.ai.hackemotion.dto.EmotionRequest;
+import com.ai.hackemotion.dto.request.EmotionRequest;
 import com.ai.hackemotion.entity.UserAssetEmotion;
 import com.ai.hackemotion.repository.UserAssetEmotionRepository;
 import com.ai.hackemotion.entity.User;

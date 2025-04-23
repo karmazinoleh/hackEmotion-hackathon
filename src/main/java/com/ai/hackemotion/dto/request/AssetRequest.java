@@ -1,4 +1,4 @@
-package com.ai.hackemotion.dto;
+package com.ai.hackemotion.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

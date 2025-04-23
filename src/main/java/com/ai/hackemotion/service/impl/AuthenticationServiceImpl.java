@@ -1,14 +1,15 @@
 package com.ai.hackemotion.service.impl;
 
-import com.ai.hackemotion.dto.AuthenticationRequest;
-import com.ai.hackemotion.dto.AuthenticationResponse;
-import com.ai.hackemotion.dto.RegistrationRequest;
+import com.ai.hackemotion.dto.request.AuthenticationRequest;
+import com.ai.hackemotion.dto.response.AuthenticationResponse;
+import com.ai.hackemotion.dto.request.RegistrationRequest;
 import com.ai.hackemotion.enums.EmailTemplateName;
 import com.ai.hackemotion.repository.RoleRepository;
 import com.ai.hackemotion.entity.Token;
 import com.ai.hackemotion.repository.TokenRepository;
 import com.ai.hackemotion.entity.User;
 import com.ai.hackemotion.repository.UserRepository;
+import com.ai.hackemotion.security.service.impl.JwtServiceImpl;
 import com.ai.hackemotion.service.AuthenticationService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;

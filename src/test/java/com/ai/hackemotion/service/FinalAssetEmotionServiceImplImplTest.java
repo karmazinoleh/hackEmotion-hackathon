@@ -1,4 +1,4 @@
-package com.ai.hackemotion.emotion;
+package com.ai.hackemotion.service;
 
 import com.ai.hackemotion.entity.Asset;
 import com.ai.hackemotion.entity.Emotion;

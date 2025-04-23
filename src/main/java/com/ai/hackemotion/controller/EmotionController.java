@@ -1,6 +1,6 @@
 package com.ai.hackemotion.controller;
 
-import com.ai.hackemotion.dto.EmotionRequest;
+import com.ai.hackemotion.dto.request.EmotionRequest;
 import com.ai.hackemotion.service.impl.EmotionServiceImpl;
 import org.springframework.web.bind.annotation.*;
 
