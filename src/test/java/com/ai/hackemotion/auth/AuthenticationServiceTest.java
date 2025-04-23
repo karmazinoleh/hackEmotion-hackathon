@@ -1,14 +1,18 @@
 package com.ai.hackemotion.auth;
 
-import com.ai.hackemotion.email.EmailService;
-import com.ai.hackemotion.email.EmailTemplateName;
-import com.ai.hackemotion.role.Role;
-import com.ai.hackemotion.role.RoleRepository;
-import com.ai.hackemotion.security.JwtService;
-import com.ai.hackemotion.user.Token;
-import com.ai.hackemotion.user.TokenRepository;
-import com.ai.hackemotion.user.User;
-import com.ai.hackemotion.user.UserRepository;
+import com.ai.hackemotion.dto.AuthenticationRequest;
+import com.ai.hackemotion.dto.AuthenticationResponse;
+import com.ai.hackemotion.dto.RegistrationRequest;
+import com.ai.hackemotion.service.EmailService;
+import com.ai.hackemotion.enums.EmailTemplateName;
+import com.ai.hackemotion.entity.Role;
+import com.ai.hackemotion.repository.RoleRepository;
+import com.ai.hackemotion.service.AuthenticationService;
+import com.ai.hackemotion.service.JwtService;
+import com.ai.hackemotion.entity.Token;
+import com.ai.hackemotion.repository.TokenRepository;
+import com.ai.hackemotion.entity.User;
+import com.ai.hackemotion.repository.UserRepository;
 import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,18 +22,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.management.InstanceAlreadyExistsException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;

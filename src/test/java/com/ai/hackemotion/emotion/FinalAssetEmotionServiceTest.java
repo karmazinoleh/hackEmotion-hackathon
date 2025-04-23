@@ -1,34 +1,27 @@
 package com.ai.hackemotion.emotion;
 
-import com.ai.hackemotion.asset.Asset;
-import com.ai.hackemotion.asset.AssetRepository;
-import com.ai.hackemotion.user.User;
+import com.ai.hackemotion.entity.Asset;
+import com.ai.hackemotion.entity.Emotion;
+import com.ai.hackemotion.entity.FinalAssetEmotion;
+import com.ai.hackemotion.entity.UserAssetEmotion;
+import com.ai.hackemotion.repository.AssetRepository;
+import com.ai.hackemotion.repository.FinalAssetEmotionRepository;
+import com.ai.hackemotion.repository.UserAssetEmotionRepository;
+import com.ai.hackemotion.service.FinalAssetEmotionService;
+import com.ai.hackemotion.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.ArgumentCaptor;
 
-import javax.management.InstanceAlreadyExistsException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)

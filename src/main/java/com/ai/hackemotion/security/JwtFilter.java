@@ -1,5 +1,6 @@
 package com.ai.hackemotion.security;
 
+import com.ai.hackemotion.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

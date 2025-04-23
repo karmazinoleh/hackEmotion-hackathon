@@ -1,8 +1,16 @@
 package com.ai.hackemotion.asset;
 
-import com.ai.hackemotion.emotion.*;
-import com.ai.hackemotion.user.User;
-import com.ai.hackemotion.user.UserRepository;
+import com.ai.hackemotion.dto.AssetRequest;
+import com.ai.hackemotion.dto.EmotionRequest;
+import com.ai.hackemotion.entity.Asset;
+import com.ai.hackemotion.entity.Emotion;
+import com.ai.hackemotion.entity.UserAssetEmotion;
+import com.ai.hackemotion.repository.AssetRepository;
+import com.ai.hackemotion.repository.EmotionRepository;
+import com.ai.hackemotion.repository.UserAssetEmotionRepository;
+import com.ai.hackemotion.service.AssetService;
+import com.ai.hackemotion.entity.User;
+import com.ai.hackemotion.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
