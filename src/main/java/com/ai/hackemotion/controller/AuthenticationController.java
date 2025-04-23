@@ -2,7 +2,7 @@ package com.ai.hackemotion.controller;
 
 import com.ai.hackemotion.dto.AuthenticationRequest;
 import com.ai.hackemotion.dto.AuthenticationResponse;
-import com.ai.hackemotion.service.AuthenticationService;
+import com.ai.hackemotion.service.impl.AuthenticationServiceImpl;
 import com.ai.hackemotion.dto.RegistrationRequest;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
@@ -20,7 +20,7 @@ import javax.management.InstanceAlreadyExistsException;
 @Tag(name = "Authentication")
 public class AuthenticationController {
 
-    private final AuthenticationService service;
+    private final AuthenticationServiceImpl service;
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.ACCEPTED)

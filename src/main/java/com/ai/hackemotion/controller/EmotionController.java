@@ -1,16 +1,16 @@
 package com.ai.hackemotion.controller;
 
 import com.ai.hackemotion.dto.EmotionRequest;
-import com.ai.hackemotion.service.EmotionService;
+import com.ai.hackemotion.service.impl.EmotionServiceImpl;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("emotion")
 public class EmotionController {
-    private final EmotionService emotionService;
+    private final EmotionServiceImpl emotionServiceImpl;
 
-    public EmotionController(EmotionService emotionService) {
-        this.emotionService = emotionService;
+    public EmotionController(EmotionServiceImpl emotionServiceImpl) {
+        this.emotionServiceImpl = emotionServiceImpl;
     }
 
     @PostMapping("add")

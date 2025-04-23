@@ -1,4 +1,4 @@
-package com.ai.hackemotion.service;
+package com.ai.hackemotion.service.impl;
 
 import com.ai.hackemotion.repository.UserRepository;
 import jakarta.transaction.Transactional;

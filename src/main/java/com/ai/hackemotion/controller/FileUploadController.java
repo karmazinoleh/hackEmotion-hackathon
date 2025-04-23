@@ -1,6 +1,6 @@
 package com.ai.hackemotion.controller;
 
-import com.ai.hackemotion.service.AmazonS3Service;
+import com.ai.hackemotion.service.impl.AmazonS3ServiceImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,16 +14,16 @@ import java.util.Map;
 @RequestMapping("/api/files")
 public class FileUploadController {
 
-    private final AmazonS3Service amazonS3Service;
+    private final AmazonS3ServiceImpl amazonS3ServiceImpl;
 
-    public FileUploadController(AmazonS3Service amazonS3Service) {
-        this.amazonS3Service = amazonS3Service;
+    public FileUploadController(AmazonS3ServiceImpl amazonS3ServiceImpl) {
+        this.amazonS3ServiceImpl = amazonS3ServiceImpl;
     }
 
     @PostMapping("/upload")
     public ResponseEntity<Map<String, String>> uploadFile(@RequestParam("file") MultipartFile file) {
         try {
-            String fileUrl = amazonS3Service.uploadFile(
+            String fileUrl = amazonS3ServiceImpl.uploadFile(
                     file.getOriginalFilename(),
                     file.getInputStream(),
                     file.getContentType()

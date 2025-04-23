@@ -3,12 +3,12 @@ package com.ai.hackemotion.auth;
 import com.ai.hackemotion.dto.AuthenticationRequest;
 import com.ai.hackemotion.dto.AuthenticationResponse;
 import com.ai.hackemotion.dto.RegistrationRequest;
-import com.ai.hackemotion.service.EmailService;
+import com.ai.hackemotion.service.impl.EmailServiceImpl;
 import com.ai.hackemotion.enums.EmailTemplateName;
 import com.ai.hackemotion.entity.Role;
 import com.ai.hackemotion.repository.RoleRepository;
-import com.ai.hackemotion.service.AuthenticationService;
-import com.ai.hackemotion.service.JwtService;
+import com.ai.hackemotion.service.impl.AuthenticationServiceImpl;
+import com.ai.hackemotion.service.impl.JwtServiceImpl;
 import com.ai.hackemotion.entity.Token;
 import com.ai.hackemotion.repository.TokenRepository;
 import com.ai.hackemotion.entity.User;
@@ -37,7 +37,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class AuthenticationServiceTest {
+class AuthenticationServiceImplTest {
 
     @Mock
     private RoleRepository roleRepository;
@@ -48,13 +48,13 @@ class AuthenticationServiceTest {
     @Mock
     private TokenRepository tokenRepository;
     @Mock
-    private EmailService emailService;
+    private EmailServiceImpl emailServiceImpl;
     @Mock
     private AuthenticationManager authenticationManager;
     @Mock
-    private JwtService jwtService;
+    private JwtServiceImpl jwtServiceImpl;
     @InjectMocks
-    private AuthenticationService authenticationService;
+    private AuthenticationServiceImpl authenticationServiceImpl;
 
     private Role userRole;
     private User user;
@@ -87,7 +87,7 @@ class AuthenticationServiceTest {
         authenticationRequest.setEmail("test@email.com");
         authenticationRequest.setPassword("password");
 
-        ReflectionTestUtils.setField(authenticationService, "activationUrl", "http://localhost:3000/activate");
+        ReflectionTestUtils.setField(authenticationServiceImpl, "activationUrl", "http://localhost:3000/activate");
     }
 
     @Test
@@ -96,7 +96,7 @@ class AuthenticationServiceTest {
         when(roleRepository.findByName("USER")).thenReturn(Optional.of(userRole));
         when(passwordEncoder.encode(anyString())).thenReturn(ENCODED_PASSWORD);
 
-        authenticationService.register(registrationRequest);
+        authenticationServiceImpl.register(registrationRequest);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
@@ -115,7 +115,7 @@ class AuthenticationServiceTest {
         assertEquals(userRole, capturedUser.getRoleList().get(0));
 
         verify(tokenRepository).save(any());
-        verify(emailService).sendEmail(
+        verify(emailServiceImpl).sendEmail(
                 eq(registrationRequest.getEmail()),
                 eq(registrationRequest.getUsername()),
                 eq(EmailTemplateName.ACTIVATE_ACCOUNT),
@@ -131,7 +131,7 @@ class AuthenticationServiceTest {
         when(roleRepository.findByName("USER")).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(IllegalStateException.class, () -> {
-                authenticationService.register(registrationRequest);
+                authenticationServiceImpl.register(registrationRequest);
         });
 
         assertEquals("Role user was not init.!", exception.getMessage());
@@ -151,7 +151,7 @@ class AuthenticationServiceTest {
         when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(existingUser));
 
         Exception exeption = assertThrows(IllegalStateException.class, () -> {
-            authenticationService.register(registrationRequest);
+            authenticationServiceImpl.register(registrationRequest);
         });
 
         assertEquals("Username already in use: testUser", exeption.getMessage());
@@ -168,12 +168,12 @@ class AuthenticationServiceTest {
         when(passwordEncoder.encode(anyString())).thenReturn(ENCODED_PASSWORD);
 
         doThrow(new MessagingException("Email sending failed"))
-                .when(emailService).sendEmail(
+                .when(emailServiceImpl).sendEmail(
                         anyString(), anyString(), any(), anyString(), anyString(), anyString()
                 );
 
         MessagingException exception = assertThrows(MessagingException.class, () -> {
-            authenticationService.register(registrationRequest);
+            authenticationServiceImpl.register(registrationRequest);
         });
 
         assertEquals("Email sending failed", exception.getMessage());
@@ -193,10 +193,10 @@ class AuthenticationServiceTest {
 
         var claims = new HashMap<String, Object>();
         claims.put("username", userDetails.getUsername());
-        when(jwtService.generateToken(claims, userDetails)).thenReturn(AUTH_TOKEN);
+        when(jwtServiceImpl.generateToken(claims, userDetails)).thenReturn(AUTH_TOKEN);
 
         // Act
-        AuthenticationResponse response = authenticationService.authenticate(authenticationRequest);
+        AuthenticationResponse response = authenticationServiceImpl.authenticate(authenticationRequest);
 
         // Assert
         assertNotNull(response);
@@ -210,7 +210,7 @@ class AuthenticationServiceTest {
 
         // Act
         BadCredentialsException exception = assertThrows(BadCredentialsException.class, () -> {
-            authenticationService.authenticate(authenticationRequest);
+            authenticationServiceImpl.authenticate(authenticationRequest);
         });
 
         // Assert
@@ -231,7 +231,7 @@ class AuthenticationServiceTest {
         when(userRepository.findById("1")).thenReturn(Optional.of(user));
 
         // Act
-        authenticationService.activateAccount("activateAccountToken");
+        authenticationServiceImpl.activateAccount("activateAccountToken");
 
         // Assert
         assertTrue(user.isEnabled());
@@ -255,7 +255,7 @@ class AuthenticationServiceTest {
 
         // Act
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            authenticationService.activateAccount("activateAccountToken");
+            authenticationServiceImpl.activateAccount("activateAccountToken");
         });
 
         // Assert
@@ -270,7 +270,7 @@ class AuthenticationServiceTest {
 
         // Act
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            authenticationService.activateAccount("activateAccountToken");
+            authenticationServiceImpl.activateAccount("activateAccountToken");
         });
 
         // Assert

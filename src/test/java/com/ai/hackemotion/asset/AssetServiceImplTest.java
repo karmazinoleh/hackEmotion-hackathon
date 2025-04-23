@@ -8,7 +8,7 @@ import com.ai.hackemotion.entity.UserAssetEmotion;
 import com.ai.hackemotion.repository.AssetRepository;
 import com.ai.hackemotion.repository.EmotionRepository;
 import com.ai.hackemotion.repository.UserAssetEmotionRepository;
-import com.ai.hackemotion.service.AssetService;
+import com.ai.hackemotion.service.impl.AssetServiceImpl;
 import com.ai.hackemotion.entity.User;
 import com.ai.hackemotion.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -27,7 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class AssetServiceTest {
+class AssetServiceImplTest {
 
     @Mock
     private AssetRepository assetRepository;
@@ -42,7 +42,7 @@ class AssetServiceTest {
     private UserRepository userRepository;
 
     @InjectMocks
-    private AssetService assetService;
+    private AssetServiceImpl assetServiceImpl;
 
     private User testUser;
     private Asset testAsset;
@@ -75,7 +75,7 @@ class AssetServiceTest {
         when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(testUser));
         when(assetRepository.save(any(Asset.class))).thenReturn(testAsset);
 
-        Asset result = assetService.createAsset(request);
+        Asset result = assetServiceImpl.createAsset(request);
 
         assertNotNull(result);
         assertEquals("Test Asset", result.getName());
@@ -94,7 +94,7 @@ class AssetServiceTest {
         when(userRepository.findByUsername("nonExistentUser")).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
-            assetService.createAsset(request);
+            assetServiceImpl.createAsset(request);
         });
 
         assertEquals("User not found: nonExistentUser", exception.getMessage());
@@ -122,7 +122,7 @@ class AssetServiceTest {
                         .build()
                 );
 
-        Asset result = assetService.addEmotionsToAsset(assetId, emotionRequest);
+        Asset result = assetServiceImpl.addEmotionsToAsset(assetId, emotionRequest);
 
         assertNotNull(result);
         assertEquals(testAsset.getId(), result.getId());
@@ -151,7 +151,7 @@ class AssetServiceTest {
         when(userRepository.findByUsername("nonExistentUser")).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(EntityNotFoundException.class, () -> {
-            assetService.addEmotionsToAsset(assetId, emotionRequest);
+            assetServiceImpl.addEmotionsToAsset(assetId, emotionRequest);
         });
 
         assertTrue(exception.getMessage().contains("User not found"));
@@ -174,7 +174,7 @@ class AssetServiceTest {
         when(assetRepository.findById(assetId)).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
-            assetService.addEmotionsToAsset(assetId, emotionRequest);
+            assetServiceImpl.addEmotionsToAsset(assetId, emotionRequest);
         });
 
         assertEquals("Asset not found", exception.getMessage());
@@ -199,7 +199,7 @@ class AssetServiceTest {
         when(emotionRepository.findById(nonExistentEmotion.getId())).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
-            assetService.addEmotionsToAsset(assetId, emotionRequest);
+            assetServiceImpl.addEmotionsToAsset(assetId, emotionRequest);
         });
 
         assertTrue(exception.getMessage().contains("Emotion not found"));

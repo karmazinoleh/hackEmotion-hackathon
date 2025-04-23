@@ -7,7 +7,7 @@ import com.ai.hackemotion.entity.UserAssetEmotion;
 import com.ai.hackemotion.repository.AssetRepository;
 import com.ai.hackemotion.repository.FinalAssetEmotionRepository;
 import com.ai.hackemotion.repository.UserAssetEmotionRepository;
-import com.ai.hackemotion.service.FinalAssetEmotionService;
+import com.ai.hackemotion.service.impl.FinalAssetEmotionServiceImpl;
 import com.ai.hackemotion.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class FinalAssetEmotionServiceTest {
+class FinalAssetEmotionServiceImplImplTest {
 
     @Mock
     private FinalAssetEmotionRepository finalAssetEmotionRepository;
@@ -34,7 +34,7 @@ class FinalAssetEmotionServiceTest {
     @Mock
     private AssetRepository assetRepository;
     @InjectMocks
-    private FinalAssetEmotionService finalAssetEmotionService;
+    private FinalAssetEmotionServiceImpl finalAssetEmotionServiceImpl;
     private Asset asset;
     private User user;
     private UserAssetEmotion userAssetEmotion;
@@ -76,7 +76,7 @@ class FinalAssetEmotionServiceTest {
 
         ArgumentCaptor<FinalAssetEmotion> captor = ArgumentCaptor.forClass(FinalAssetEmotion.class);
         // Act
-        finalAssetEmotionService.updateFinalEmotion(1L);
+        finalAssetEmotionServiceImpl.updateFinalEmotion(1L);
 
         // Assert
         verify(finalAssetEmotionRepository).save(captor.capture());

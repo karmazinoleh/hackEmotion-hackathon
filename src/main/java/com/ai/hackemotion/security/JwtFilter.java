@@ -1,6 +1,6 @@
 package com.ai.hackemotion.security;
 
-import com.ai.hackemotion.service.JwtService;
+import com.ai.hackemotion.service.impl.JwtServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,7 +21,7 @@ import java.io.IOException;
 public class JwtFilter extends OncePerRequestFilter {
 
     private final UserDetailsService userDetailsService;
-    private final JwtService jwtService;
+    private final JwtServiceImpl jwtServiceImpl;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -35,11 +35,11 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         jwtToken = authHeader.substring(7);
-        userName = jwtService.extractUsername(jwtToken);
+        userName = jwtServiceImpl.extractUsername(jwtToken);
 
         if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userName);
-            if (jwtService.isTokenValid(jwtToken, userDetails)) {
+            if (jwtServiceImpl.isTokenValid(jwtToken, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

@@ -7,9 +7,9 @@ import com.ai.hackemotion.entity.UserAssetEmotion;
 import com.ai.hackemotion.repository.AssetRepository;
 import com.ai.hackemotion.repository.EmotionRepository;
 import com.ai.hackemotion.repository.UserAssetEmotionRepository;
-import com.ai.hackemotion.service.AssetService;
-import com.ai.hackemotion.service.EmotionService;
-import com.ai.hackemotion.service.FinalAssetEmotionService;
+import com.ai.hackemotion.service.impl.AssetServiceImpl;
+import com.ai.hackemotion.service.impl.EmotionServiceImpl;
+import com.ai.hackemotion.service.impl.FinalAssetEmotionServiceImpl;
 import com.ai.hackemotion.entity.User;
 import com.ai.hackemotion.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
@@ -21,39 +21,39 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("asset")
 public class AssetController {
-    private final AssetService assetService;
-    private final EmotionService service;
+    private final AssetServiceImpl assetServiceImpl;
+    private final EmotionServiceImpl service;
     private final UserAssetEmotionRepository UAErepository;
     private final UserRepository userRepository;
     private final AssetRepository assetRepository;
     private final EmotionRepository emotionRepository;
-    private final FinalAssetEmotionService finalAssetEmotionService;
+    private final FinalAssetEmotionServiceImpl finalAssetEmotionServiceImpl;
 
-    public AssetController(AssetService assetService, EmotionService request,
-                           EmotionService service, UserAssetEmotionRepository repository,
+    public AssetController(AssetServiceImpl assetServiceImpl, EmotionServiceImpl request,
+                           EmotionServiceImpl service, UserAssetEmotionRepository repository,
                            UserAssetEmotionRepository uaErepository,
                            UserRepository userRepository, AssetRepository assetRepository,
                            EmotionRepository emotionRepository,
-                           FinalAssetEmotionService finalAssetEmotionService) {
-        this.assetService = assetService;
+                           FinalAssetEmotionServiceImpl finalAssetEmotionServiceImpl) {
+        this.assetServiceImpl = assetServiceImpl;
         this.service = service;
         this.UAErepository = uaErepository;
         this.userRepository = userRepository;
         this.assetRepository = assetRepository;
         this.emotionRepository = emotionRepository;
-        this.finalAssetEmotionService = finalAssetEmotionService;
+        this.finalAssetEmotionServiceImpl = finalAssetEmotionServiceImpl;
     }
 
     @PostMapping("/{assetId}/add-emotions")
     public ResponseEntity<Asset> addEmotions(
             @PathVariable Long assetId,
             @RequestBody EmotionRequest request) {
-        return ResponseEntity.ok(assetService.addEmotionsToAsset(assetId, request));
+        return ResponseEntity.ok(assetServiceImpl.addEmotionsToAsset(assetId, request));
     }
 
     @PostMapping("/create-asset")
     public ResponseEntity<Asset> createAsset(@RequestBody AssetRequest request) {
-        return ResponseEntity.ok(assetService.createAsset(request));
+        return ResponseEntity.ok(assetServiceImpl.createAsset(request));
     }
 
     /*@GetMapping("/{assetId}/emotions")
@@ -134,7 +134,7 @@ public class AssetController {
         vote.setEmotion(emotion);
 
         UAErepository.save(vote);
-        finalAssetEmotionService.updateFinalEmotion(assetId);
+        finalAssetEmotionServiceImpl.updateFinalEmotion(assetId);
 
         return ResponseEntity.ok("Vote recorded");
     }
