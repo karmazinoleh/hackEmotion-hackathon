@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class FinalAssetEmotionService {
     private final FinalAssetEmotionRepository finalAssetEmotionRepository;
     private final UserAssetEmotionRepository userAssetEmotionRepository;
-    private final AssetRepository assetRepository; // Added repository
+    private final AssetRepository assetRepository;
 
     public FinalAssetEmotionService(FinalAssetEmotionRepository finalAssetEmotionRepository,
                                     UserAssetEmotionRepository userAssetEmotionRepository,

@@ -22,7 +22,7 @@ public class Asset {
 
     private String name;
 
-    private LocalDateTime localDateTime;
+    private LocalDateTime localDateTime; // do not use
 
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
