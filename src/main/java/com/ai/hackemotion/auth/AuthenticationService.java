@@ -22,6 +22,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.management.InstanceAlreadyExistsException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -44,22 +45,27 @@ public class AuthenticationService {
     private RatingService rating;
 
 
-    public void register(RegistrationRequest request) throws MessagingException {
-        var userRole = roleRepository.findByName("USER")
-                .orElseThrow(() -> new IllegalStateException("Role user was not init.!"));
-        var user = User.builder().username(request.getUsername())
-                .fullName(request.getFullName())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .accountLocked(false)
-                .enabled(false)
-                //.score(0)
-                .datasetsUploaded(0)
-                .datasetsRated(0)
-                .roleList(List.of(userRole))
-                .build();
-        userRepository.save(user);
-        sendValidationEmail(user);
+    public void register(RegistrationRequest request) throws MessagingException, InstanceAlreadyExistsException {
+        if(userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new IllegalStateException("Username already in use: " + request.getUsername());
+        } else {
+
+            var userRole = roleRepository.findByName("USER")
+                    .orElseThrow(() -> new IllegalStateException("Role user was not init.!"));
+
+            var user = User.builder().username(request.getUsername())
+                    .fullName(request.getFullName())
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .accountLocked(false)
+                    .enabled(false)
+                    .datasetsUploaded(0)
+                    .datasetsRated(0)
+                    .roleList(List.of(userRole))
+                    .build();
+            userRepository.save(user);
+            sendValidationEmail(user);
+        }
     }
 
     private void sendValidationEmail(User user) throws MessagingException {
@@ -106,7 +112,7 @@ public class AuthenticationService {
         //        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         claims.put("username", user.getUsername());
         var jwtToken = jwtService.generateToken(claims, user);
-        rating.updateScore((User) auth.getPrincipal(), 5); // Should work?
+        //rating.updateScore((User) auth.getPrincipal(), 5);
         return AuthenticationResponse.builder().token(jwtToken).build();
     }
 

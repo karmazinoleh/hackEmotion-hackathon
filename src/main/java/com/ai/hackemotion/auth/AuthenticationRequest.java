@@ -4,13 +4,13 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class AuthenticationRequest {
     @NotEmpty(message = "Email is empty!")
     @NotBlank(message = "Email is empty!")
@@ -20,5 +20,4 @@ public class AuthenticationRequest {
     @NotBlank(message = "Password is empty!")
     @Size(min = 8, message = "Min. password length is 8 char.")
     private String password;
-
 }

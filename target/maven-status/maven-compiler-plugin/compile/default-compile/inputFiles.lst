@@ -5,9 +5,10 @@
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/asset/AssetController.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/asset/AssetRepository.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/asset/AssetRequest.java
+/Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/asset/AssetResponse.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/asset/AssetService.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/asset/EmotionAssignment.java
-/Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/asset/EmotionWithIntensityRequest.java
+/Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/asset/VoteRequest.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/auth/AuthenticationController.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/auth/AuthenticationRequest.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/auth/AuthenticationResponse.java
@@ -23,7 +24,17 @@
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/emotion/EmotionRequest.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/emotion/EmotionService.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/emotion/EmotionType.java
+/Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/emotion/FinalAssetEmotion.java
+/Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/emotion/FinalAssetEmotionRepository.java
+/Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/emotion/FinalAssetEmotionService.java
+/Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/emotion/UserAssetEmotion.java
+/Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/emotion/UserAssetEmotionRepository.java
+/Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/emotion/UserAssetEmotionRequest.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/message/MessagesController.java
+/Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/rating/Rating.java
+/Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/rating/RatingController.java
+/Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/rating/RatingRepository.java
+/Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/rating/RatingService.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/role/Role.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/role/RoleRepository.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/security/JwtFilter.java
@@ -33,5 +44,6 @@
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/user/Token.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/user/TokenRepository.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/user/User.java
+/Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/user/UserController.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/user/UserRepository.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/user/UserService.java

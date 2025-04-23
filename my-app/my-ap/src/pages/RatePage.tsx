@@ -19,7 +19,7 @@ type EmotionOption = {
 
 const emotions: EmotionOption[] = [
     { id: 0, value: "HAPPINESS", label: "Happiness" },
-    { id: 1, value: "SADNESS", label: "Sadness" },
+    { id: 1, value: "SADNESS",   label: "Sadness" },
     { id: 2, value: "FEAR", label: "Fear" },
     { id: 3, value: "ANGER", label: "Anger" },
     { id: 4, value: "REVULSION", label: "Revulsion" },
