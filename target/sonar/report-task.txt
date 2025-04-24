@@ -1,0 +1,6 @@
+projectKey=hackemotion-hackathon
+serverUrl=http://localhost:9000
+serverVersion=25.4.0.105899
+dashboardUrl=http://localhost:9000/dashboard?id=hackemotion-hackathon
+ceTaskId=b5e66410-5866-4102-9d98-e09739b153aa
+ceTaskUrl=http://localhost:9000/api/ce/task?id=b5e66410-5866-4102-9d98-e09739b153aa

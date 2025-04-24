@@ -1,0 +1,5 @@
+com/ai/hackemotion/HackemotionApplicationTests.class
+com/ai/hackemotion/controller/AssetControllerTest.class
+com/ai/hackemotion/service/impl/AssetServiceImplTest.class
+com/ai/hackemotion/service/impl/FinalAssetEmotionServiceImplImplTest.class
+com/ai/hackemotion/service/impl/AuthenticationServiceImplTest.class

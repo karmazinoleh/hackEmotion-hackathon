@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AssetController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">hackemotion</a> &gt; <a href="index.source.html" class="el_package">com.ai.hackemotion.controller</a> &gt; <span class="el_source">AssetController.java</span></div><h1>AssetController.java</h1><pre class="source lang-java linenums">package com.ai.hackemotion.controller;
+
+import com.ai.hackemotion.dto.request.AssetRequest;
+import com.ai.hackemotion.dto.request.EmotionRequest;
+import com.ai.hackemotion.dto.request.UserAssetEmotionRequest;
+import com.ai.hackemotion.dto.request.VoteRequest;
+import com.ai.hackemotion.dto.response.AssetResponse;
+import com.ai.hackemotion.entity.Asset;
+import com.ai.hackemotion.entity.Emotion;
+import com.ai.hackemotion.entity.UserAssetEmotion;
+import com.ai.hackemotion.repository.AssetRepository;
+import com.ai.hackemotion.repository.EmotionRepository;
+import com.ai.hackemotion.repository.UserAssetEmotionRepository;
+import com.ai.hackemotion.service.impl.AssetServiceImpl;
+import com.ai.hackemotion.service.impl.EmotionServiceImpl;
+import com.ai.hackemotion.service.impl.FinalAssetEmotionServiceImpl;
+import com.ai.hackemotion.entity.User;
+import com.ai.hackemotion.repository.UserRepository;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping(&quot;asset&quot;)
+public class AssetController {
+    private final AssetServiceImpl assetServiceImpl;
+    private final EmotionServiceImpl service;
+    private final UserAssetEmotionRepository UAErepository;
+    private final UserRepository userRepository;
+    private final AssetRepository assetRepository;
+    private final EmotionRepository emotionRepository;
+    private final FinalAssetEmotionServiceImpl finalAssetEmotionServiceImpl;
+
+    public AssetController(AssetServiceImpl assetServiceImpl, EmotionServiceImpl request,
+                           EmotionServiceImpl service, UserAssetEmotionRepository repository,
+                           UserAssetEmotionRepository uaErepository,
+                           UserRepository userRepository, AssetRepository assetRepository,
+                           EmotionRepository emotionRepository,
+<span class="fc" id="L41">                           FinalAssetEmotionServiceImpl finalAssetEmotionServiceImpl) {</span>
+<span class="fc" id="L42">        this.assetServiceImpl = assetServiceImpl;</span>
+<span class="fc" id="L43">        this.service = service;</span>
+<span class="fc" id="L44">        this.UAErepository = uaErepository;</span>
+<span class="fc" id="L45">        this.userRepository = userRepository;</span>
+<span class="fc" id="L46">        this.assetRepository = assetRepository;</span>
+<span class="fc" id="L47">        this.emotionRepository = emotionRepository;</span>
+<span class="fc" id="L48">        this.finalAssetEmotionServiceImpl = finalAssetEmotionServiceImpl;</span>
+<span class="fc" id="L49">    }</span>
+
+    @PostMapping(&quot;/{assetId}/add-emotions&quot;)
+    public ResponseEntity&lt;Asset&gt; addEmotions(
+            @PathVariable Long assetId,
+            @RequestBody EmotionRequest request) {
+<span class="fc" id="L55">        return ResponseEntity.ok(assetServiceImpl.addEmotionsToAsset(assetId, request));</span>
+    }
+
+    @PostMapping(&quot;/create-asset&quot;)
+    public ResponseEntity&lt;Asset&gt; createAsset(@RequestBody AssetRequest request) {
+<span class="fc" id="L60">        return ResponseEntity.ok(assetServiceImpl.createAsset(request));</span>
+    }
+
+    /*@GetMapping(&quot;/{assetId}/emotions&quot;)
+    public ResponseEntity&lt;List&lt;String&gt;&gt; getEmotionsByAssetId(@PathVariable Long assetId) {
+        return ResponseEntity.ok(assetService.getEmotionNamesByAssetId(assetId));
+    }*/
+
+    @GetMapping(&quot;/{username}&quot;)
+    public ResponseEntity&lt;List&lt;UserAssetEmotionRequest&gt;&gt; getAssets(@PathVariable String username) {
+<span class="nc" id="L70">        Long userId = userRepository.findByUsername(username)</span>
+<span class="nc" id="L71">                .orElseThrow(() -&gt; new RuntimeException(&quot;Assets not found!&quot;)).getId();</span>
+
+<span class="nc" id="L73">        List&lt;UserAssetEmotion&gt; assetsList = UAErepository.findAllByUserId(userId);</span>
+<span class="nc" id="L74">        Map&lt;Long, UserAssetEmotionRequest&gt; assetMap = new HashMap&lt;&gt;();</span>
+
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        for (UserAssetEmotion asset : assetsList) {</span>
+<span class="nc" id="L77">            Long assetId = asset.getAsset().getId();</span>
+<span class="nc" id="L78">            assetMap.putIfAbsent(assetId, new UserAssetEmotionRequest(assetId, asset.getAsset().getName(), new ArrayList&lt;&gt;()));</span>
+<span class="nc" id="L79">            String emotionName = asset.getEmotion().getName();</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">            if (!assetMap.get(assetId).getEmotionNames().contains(emotionName)) {</span>
+<span class="nc" id="L81">                assetMap.get(assetId).getEmotionNames().add(emotionName);</span>
+            }
+<span class="nc" id="L83">        }</span>
+
+<span class="nc" id="L85">        return ResponseEntity.ok(new ArrayList&lt;&gt;(assetMap.values()));</span>
+    }
+
+    @GetMapping(&quot;/rate/{username}&quot;)
+    public ResponseEntity&lt;List&lt;AssetResponse&gt;&gt; getAssetsToRate(@PathVariable String username) {
+        // Get the user by username
+<span class="nc" id="L91">        User user = userRepository.findByUsername(username)</span>
+<span class="nc" id="L92">                .orElseThrow(() -&gt; new RuntimeException(&quot;User not found&quot;));</span>
+<span class="nc" id="L93">        Long userId = user.getId();</span>
+
+        // Get all assets that the user has NOT created
+<span class="nc" id="L96">        List&lt;Asset&gt; allAssets = assetRepository.findAllByUserIdNot(userId);</span>
+
+        // Get all assets that the user has already rated
+<span class="nc" id="L99">        List&lt;UserAssetEmotion&gt; userRatings = UAErepository.findAllByUserId(userId);</span>
+<span class="nc" id="L100">        Set&lt;Long&gt; ratedAssetIds = userRatings.stream()</span>
+<span class="nc" id="L101">                .map(rating -&gt; rating.getAsset().getId())</span>
+<span class="nc" id="L102">                .collect(Collectors.toSet());</span>
+
+        // Filter out assets that the user has already rated
+<span class="nc" id="L105">        List&lt;Asset&gt; assetsToRate = allAssets.stream()</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">                .filter(asset -&gt; !ratedAssetIds.contains(asset.getId()))</span>
+<span class="nc" id="L107">                .collect(Collectors.toList());</span>
+
+        // Convert to response objects
+<span class="nc" id="L110">        List&lt;AssetResponse&gt; response = assetsToRate.stream()</span>
+<span class="nc" id="L111">                .map(asset -&gt; new AssetResponse(asset.getId(), asset.getName(), asset.getUrl()))</span>
+<span class="nc" id="L112">                .collect(Collectors.toList());</span>
+
+<span class="nc" id="L114">        return ResponseEntity.ok(response);</span>
+    }
+    @PostMapping(&quot;/rate/{username}&quot;)
+    public ResponseEntity&lt;String&gt; voteForEmotion(@PathVariable String username, @RequestBody VoteRequest voteRequest) {
+<span class="fc" id="L118">        User user = userRepository.findByUsername(username)</span>
+<span class="pc" id="L119">                .orElseThrow(() -&gt; new RuntimeException(&quot;User not found&quot;));</span>
+
+<span class="fc" id="L121">        Long assetId = voteRequest.getAssetId();</span>
+
+        // Check if user has already rated this asset
+<span class="fc" id="L124">        boolean alreadyRated = UAErepository.existsByUserIdAndAssetId(user.getId(), assetId);</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">        if (alreadyRated) {</span>
+<span class="fc" id="L126">            return ResponseEntity.badRequest().body(&quot;You have already rated this asset&quot;);</span>
+        }
+
+<span class="fc" id="L129">        Asset asset = assetRepository.findById(assetId)</span>
+<span class="pc" id="L130">                .orElseThrow(() -&gt; new RuntimeException(&quot;Asset not found&quot;));</span>
+
+<span class="fc" id="L132">        Emotion emotion = emotionRepository.findById(voteRequest.getEmotionId())</span>
+<span class="pc" id="L133">                .orElseThrow(() -&gt; new RuntimeException(&quot;Emotion not found&quot;));</span>
+
+<span class="fc" id="L135">        UserAssetEmotion vote = new UserAssetEmotion();</span>
+<span class="fc" id="L136">        vote.setUser(user);</span>
+<span class="fc" id="L137">        vote.setAsset(asset);</span>
+<span class="fc" id="L138">        vote.setEmotion(emotion);</span>
+
+<span class="fc" id="L140">        UAErepository.save(vote);</span>
+<span class="fc" id="L141">        finalAssetEmotionServiceImpl.updateFinalEmotion(assetId);</span>
+
+<span class="fc" id="L143">        return ResponseEntity.ok(&quot;Vote recorded&quot;);</span>
+    }
+
+
+
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
