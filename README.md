@@ -5,10 +5,10 @@
 - [x] Upload sets of photos
 - [x] Select emotions that correspond to these photos (so far, only among those created directly in the code) 
 - [x] Store them in your S3 storage.
+- [x] Export datasets for AI training. https://github.com/karmazinoleh/hackEmotion-hackathon/issues/7
+- [x] A smart system for selecting final parameters: each participant will be able to evaluate the image and choose the right emotions, in their opinion. The final calculation will summarize and select the most likely emotion (the one most often chosen by other users). https://github.com/karmazinoleh/hackEmotion-hackathon/issues/8
 
 ### 📝 Planned to be implemented:
-- [ ] Export datasets for AI training. https://github.com/karmazinoleh/hackEmotion-hackathon/issues/7
-- [ ] A smart system for selecting final parameters: each participant will be able to evaluate the image and choose the right emotions, in their opinion. The final calculation will summarize and select the most likely emotion (the one most often chosen by other users). https://github.com/karmazinoleh/hackEmotion-hackathon/issues/8
 - [ ] Advanced rating system: getting points for rating and uploading images. https://github.com/karmazinoleh/hackEmotion-hackathon/issues/9
 
 ## 🚀 Get Started
