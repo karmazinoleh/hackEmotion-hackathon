@@ -1,5 +1,6 @@
 package com.ai.hackemotion.service.impl;
 
+import com.ai.hackemotion.dto.request.UserAssetEmotionRequest;
 import com.ai.hackemotion.entity.Asset;
 import com.ai.hackemotion.dto.request.AssetRequest;
 import com.ai.hackemotion.entity.Emotion;
@@ -13,6 +14,11 @@ import com.ai.hackemotion.repository.UserRepository;
 import com.ai.hackemotion.service.AssetService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class AssetServiceImpl implements AssetService {
@@ -69,6 +75,25 @@ public class AssetServiceImpl implements AssetService {
         }
 
         return asset;
+    }
+
+    public List<UserAssetEmotionRequest> getAssetsByUsername(String username) {
+        Long userId = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Assets not found!")).getId();
+
+        List<UserAssetEmotion> assetsList = userAssetEmotionRepository.findAllByUserId(userId);
+        Map<Long, UserAssetEmotionRequest> assetMap = new HashMap<>();
+
+        for (UserAssetEmotion asset : assetsList) {
+            Long assetId = asset.getAsset().getId();
+            assetMap.putIfAbsent(assetId, new UserAssetEmotionRequest(assetId, asset.getAsset().getName(), new ArrayList<>()));
+            String emotionName = asset.getEmotion().getName();
+            if (!assetMap.get(assetId).getEmotionNames().contains(emotionName)) {
+                assetMap.get(assetId).getEmotionNames().add(emotionName);
+            }
+        }
+
+        return new ArrayList<>(assetMap.values());
     }
 
 }
