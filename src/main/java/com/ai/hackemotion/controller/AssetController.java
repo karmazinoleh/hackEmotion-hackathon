@@ -67,22 +67,7 @@ public class AssetController {
 
     @GetMapping("/{username}")
     public ResponseEntity<List<UserAssetEmotionRequest>> getAssets(@PathVariable String username) {
-        Long userId = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Assets not found!")).getId();
-
-        List<UserAssetEmotion> assetsList = UAErepository.findAllByUserId(userId);
-        Map<Long, UserAssetEmotionRequest> assetMap = new HashMap<>();
-
-        for (UserAssetEmotion asset : assetsList) {
-            Long assetId = asset.getAsset().getId();
-            assetMap.putIfAbsent(assetId, new UserAssetEmotionRequest(assetId, asset.getAsset().getName(), new ArrayList<>()));
-            String emotionName = asset.getEmotion().getName();
-            if (!assetMap.get(assetId).getEmotionNames().contains(emotionName)) {
-                assetMap.get(assetId).getEmotionNames().add(emotionName);
-            }
-        }
-
-        return ResponseEntity.ok(new ArrayList<>(assetMap.values()));
+        return ResponseEntity.ok(new ArrayList<>(assetServiceImpl.getAssetsByUsername(username)));
     }
 
     @GetMapping("/rate/{username}")
