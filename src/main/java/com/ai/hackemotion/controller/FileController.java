@@ -1,7 +1,9 @@
 package com.ai.hackemotion.controller;
 
 import com.ai.hackemotion.service.impl.AmazonS3ServiceImpl;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,11 +14,11 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/files")
-public class FileUploadController {
+public class FileController {
 
     private final AmazonS3ServiceImpl amazonS3ServiceImpl;
 
-    public FileUploadController(AmazonS3ServiceImpl amazonS3ServiceImpl) {
+    public FileController(AmazonS3ServiceImpl amazonS3ServiceImpl) {
         this.amazonS3ServiceImpl = amazonS3ServiceImpl;
     }
 
@@ -37,5 +39,15 @@ public class FileUploadController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("message", "File upload failed: " + e.getMessage()));
         }
+    }
+
+    @GetMapping("/{fileName}")
+    public ResponseEntity<byte[]> getFile(@PathVariable String fileName) throws IOException {
+        byte[] fileData = amazonS3ServiceImpl.downloadFile(fileName);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName + "\"")
+                .contentType(MediaType.IMAGE_JPEG)
+                .body(fileData);
     }
 }
