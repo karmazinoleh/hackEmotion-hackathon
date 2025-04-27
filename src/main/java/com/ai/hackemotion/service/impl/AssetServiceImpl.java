@@ -96,4 +96,20 @@ public class AssetServiceImpl implements AssetService {
         return new ArrayList<>(assetMap.values());
     }
 
+    public List<UserAssetEmotionRequest> getAllAssets() {
+        List<UserAssetEmotion> assetsList = userAssetEmotionRepository.findAll();
+        Map<Long, UserAssetEmotionRequest> assetMap = new HashMap<>();
+
+        for (UserAssetEmotion asset : assetsList) {
+            Long assetId = asset.getAsset().getId();
+            assetMap.putIfAbsent(assetId, new UserAssetEmotionRequest(assetId, asset.getAsset().getName(), new ArrayList<>()));
+            String emotionName = asset.getEmotion().getName();
+            if (!assetMap.get(assetId).getEmotionNames().contains(emotionName)) {
+                assetMap.get(assetId).getEmotionNames().add(emotionName);
+            }
+        }
+
+        return new ArrayList<>(assetMap.values());
+    }
+
 }

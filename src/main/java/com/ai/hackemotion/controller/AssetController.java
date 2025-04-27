@@ -16,6 +16,7 @@ import com.ai.hackemotion.service.impl.EmotionServiceImpl;
 import com.ai.hackemotion.service.impl.FinalAssetEmotionServiceImpl;
 import com.ai.hackemotion.entity.User;
 import com.ai.hackemotion.repository.UserRepository;
+import com.ai.hackemotion.utils.SecurityUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -65,9 +66,14 @@ public class AssetController {
         return ResponseEntity.ok(assetService.getEmotionNamesByAssetId(assetId));
     }*/
 
-    @GetMapping("/{username}")
-    public ResponseEntity<List<UserAssetEmotionRequest>> getAssets(@PathVariable String username) {
-        return ResponseEntity.ok(new ArrayList<>(assetServiceImpl.getAssetsByUsername(username)));
+    @GetMapping("/")
+    public ResponseEntity<List<UserAssetEmotionRequest>> getAssets() {
+        String username = SecurityUtils.getCurrentUsername();
+        if(SecurityUtils.hasRole("ADMIN")){
+            return ResponseEntity.ok(new ArrayList<>(assetServiceImpl.getAllAssets()));
+        } else {
+            return ResponseEntity.ok(new ArrayList<>(assetServiceImpl.getAssetsByUsername(username)));
+        }
     }
 
     @GetMapping("/rate/{username}")
@@ -102,7 +108,6 @@ public class AssetController {
     public ResponseEntity<String> voteForEmotion(@PathVariable String username, @RequestBody VoteRequest voteRequest) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
         Long assetId = voteRequest.getAssetId();
 
         // Check if user has already rated this asset
