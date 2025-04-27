@@ -17,6 +17,7 @@ import com.ai.hackemotion.service.impl.FinalAssetEmotionServiceImpl;
 import com.ai.hackemotion.entity.User;
 import com.ai.hackemotion.repository.UserRepository;
 import com.ai.hackemotion.utils.SecurityUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -106,7 +107,7 @@ public class AssetController {
         return ResponseEntity.ok(response);
     }
     @PostMapping("/rate")
-    public ResponseEntity<String> voteForEmotion(@RequestBody VoteRequest voteRequest) {
+    public ResponseEntity<HttpStatus> voteForEmotion(@RequestBody VoteRequest voteRequest) {
         String username = SecurityUtils.getCurrentUsername();
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -115,7 +116,7 @@ public class AssetController {
         // Check if user has already rated this asset
         boolean alreadyRated = UAErepository.existsByUserIdAndAssetId(user.getId(), assetId);
         if (alreadyRated) {
-            return ResponseEntity.badRequest().body("You have already rated this asset");
+            return ResponseEntity.badRequest().body(HttpStatus.CONFLICT);
         }
 
         Asset asset = assetRepository.findById(assetId)
@@ -132,7 +133,7 @@ public class AssetController {
         UAErepository.save(vote);
         finalAssetEmotionServiceImpl.updateFinalEmotion(assetId);
 
-        return ResponseEntity.ok("Vote recorded");
+        return ResponseEntity.ok(HttpStatus.ACCEPTED);
     }
 
 
