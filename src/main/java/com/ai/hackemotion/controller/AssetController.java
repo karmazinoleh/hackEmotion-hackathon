@@ -76,8 +76,9 @@ public class AssetController {
         }
     }
 
-    @GetMapping("/rate/{username}")
-    public ResponseEntity<List<AssetResponse>> getAssetsToRate(@PathVariable String username) {
+    @GetMapping("/rate")
+    public ResponseEntity<List<AssetResponse>> getAssetsToRate() {
+        String username = SecurityUtils.getCurrentUsername();
         // Get the user by username
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -104,8 +105,9 @@ public class AssetController {
 
         return ResponseEntity.ok(response);
     }
-    @PostMapping("/rate/{username}")
-    public ResponseEntity<String> voteForEmotion(@PathVariable String username, @RequestBody VoteRequest voteRequest) {
+    @PostMapping("/rate")
+    public ResponseEntity<String> voteForEmotion(@RequestBody VoteRequest voteRequest) {
+        String username = SecurityUtils.getCurrentUsername();
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         Long assetId = voteRequest.getAssetId();
