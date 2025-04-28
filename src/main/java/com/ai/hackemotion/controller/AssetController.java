@@ -11,12 +11,14 @@ import com.ai.hackemotion.entity.UserAssetEmotion;
 import com.ai.hackemotion.repository.AssetRepository;
 import com.ai.hackemotion.repository.EmotionRepository;
 import com.ai.hackemotion.repository.UserAssetEmotionRepository;
+import com.ai.hackemotion.security.service.impl.JwtServiceImpl;
 import com.ai.hackemotion.service.impl.AssetServiceImpl;
 import com.ai.hackemotion.service.impl.EmotionServiceImpl;
 import com.ai.hackemotion.service.impl.FinalAssetEmotionServiceImpl;
 import com.ai.hackemotion.entity.User;
 import com.ai.hackemotion.repository.UserRepository;
-import com.ai.hackemotion.utils.SecurityUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("asset")
+@RequiredArgsConstructor
 public class AssetController {
     private final AssetServiceImpl assetServiceImpl;
     private final EmotionServiceImpl service;
@@ -34,21 +37,7 @@ public class AssetController {
     private final AssetRepository assetRepository;
     private final EmotionRepository emotionRepository;
     private final FinalAssetEmotionServiceImpl finalAssetEmotionServiceImpl;
-
-    public AssetController(AssetServiceImpl assetServiceImpl, EmotionServiceImpl request,
-                           EmotionServiceImpl service, UserAssetEmotionRepository repository,
-                           UserAssetEmotionRepository uaErepository,
-                           UserRepository userRepository, AssetRepository assetRepository,
-                           EmotionRepository emotionRepository,
-                           FinalAssetEmotionServiceImpl finalAssetEmotionServiceImpl) {
-        this.assetServiceImpl = assetServiceImpl;
-        this.service = service;
-        this.UAErepository = uaErepository;
-        this.userRepository = userRepository;
-        this.assetRepository = assetRepository;
-        this.emotionRepository = emotionRepository;
-        this.finalAssetEmotionServiceImpl = finalAssetEmotionServiceImpl;
-    }
+    private final JwtServiceImpl jwtServiceImpl;
 
     @PostMapping("/{assetId}/add-emotions")
     public ResponseEntity<Asset> addEmotions(
@@ -62,15 +51,17 @@ public class AssetController {
         return ResponseEntity.ok(assetServiceImpl.createAsset(request));
     }
 
-    /*@GetMapping("/{assetId}/emotions")
-    public ResponseEntity<List<String>> getEmotionsByAssetId(@PathVariable Long assetId) {
-        return ResponseEntity.ok(assetService.getEmotionNamesByAssetId(assetId));
-    }*/
-
     @GetMapping("/")
-    public ResponseEntity<List<UserAssetEmotionRequest>> getAssets() {
-        String username = SecurityUtils.getCurrentUsername();
-        if(SecurityUtils.hasRole("ADMIN")){
+    public ResponseEntity<List<UserAssetEmotionRequest>> getAssets(HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        String cleanToken = token.replace("Bearer ", "");
+        String username = jwtServiceImpl.extractUsername(token);
+
+        if (token == null || !token.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        if(jwtServiceImpl.hasRole(cleanToken, "ADMIN")){
             return ResponseEntity.ok(new ArrayList<>(assetServiceImpl.getAllAssets()));
         } else {
             return ResponseEntity.ok(new ArrayList<>(assetServiceImpl.getAssetsByUsername(username)));
@@ -78,8 +69,8 @@ public class AssetController {
     }
 
     @GetMapping("/rate")
-    public ResponseEntity<List<AssetResponse>> getAssetsToRate() {
-        String username = SecurityUtils.getCurrentUsername();
+    public ResponseEntity<List<AssetResponse>> getAssetsToRate(HttpServletRequest request) {
+        String username = jwtServiceImpl.extractUsername(request.getHeader("Authorization"));
         // Get the user by username
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -107,8 +98,8 @@ public class AssetController {
         return ResponseEntity.ok(response);
     }
     @PostMapping("/rate")
-    public ResponseEntity<HttpStatus> voteForEmotion(@RequestBody VoteRequest voteRequest) {
-        String username = SecurityUtils.getCurrentUsername();
+    public ResponseEntity<HttpStatus> voteForEmotion(HttpServletRequest request, @RequestBody VoteRequest voteRequest) {
+        String username = jwtServiceImpl.extractUsername(request.getHeader("Authorization"));
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         Long assetId = voteRequest.getAssetId();

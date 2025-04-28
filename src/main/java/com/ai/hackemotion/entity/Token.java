@@ -1,5 +1,6 @@
 package com.ai.hackemotion.entity;
 
+import com.ai.hackemotion.enums.TokenType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,6 +20,13 @@ public class Token {
     private LocalDateTime createdAt;
     private LocalDateTime expiresAt;
     private LocalDateTime validatedAt;
+
+    @Enumerated(EnumType.STRING)
+    private TokenType tokenType = TokenType.ACCESS;
+
+    private boolean expired;
+    private boolean revoked;
+
     @ManyToOne
     @JoinColumn(name = "userId", nullable = false)
     private User user;

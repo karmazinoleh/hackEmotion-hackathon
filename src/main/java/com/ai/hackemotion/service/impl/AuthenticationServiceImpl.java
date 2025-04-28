@@ -4,6 +4,7 @@ import com.ai.hackemotion.dto.request.AuthenticationRequest;
 import com.ai.hackemotion.dto.response.AuthenticationResponse;
 import com.ai.hackemotion.dto.request.RegistrationRequest;
 import com.ai.hackemotion.enums.EmailTemplateName;
+import com.ai.hackemotion.enums.TokenType;
 import com.ai.hackemotion.repository.RoleRepository;
 import com.ai.hackemotion.entity.Token;
 import com.ai.hackemotion.repository.TokenRepository;
@@ -43,6 +44,45 @@ public class AuthenticationServiceImpl  implements AuthenticationService {
     private String activationUrl;
     @Autowired
     private RatingServiceImpl rating;
+
+    public void saveUserToken(User user, String jwtToken, TokenType tokenType) {
+        var token = Token.builder()
+                .user(user)
+                .token(jwtToken)
+                .tokenType(tokenType)
+                .expired(false)
+                .revoked(false)
+                .createdAt(LocalDateTime.now())
+                .expiresAt(LocalDateTime.now().plusMinutes(15)) // доступний 15 хвилин
+                .build();
+        tokenRepository.save(token);
+    }
+
+    public void revokeAllUserTokens(User user) {
+        var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
+        if (validUserTokens.isEmpty())
+            return;
+        validUserTokens.forEach(token -> {
+            token.setExpired(true);
+            token.setRevoked(true);
+        });
+        tokenRepository.saveAll(validUserTokens);
+    }
+    public void revokeAllUserAccessTokens(User user) {
+        var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
+        if (validUserTokens.isEmpty())
+            return;
+
+        validUserTokens.forEach(token -> {
+            if (token.getTokenType() == TokenType.ACCESS) {
+                token.setExpired(true);
+                token.setRevoked(true);
+            }
+        });
+        tokenRepository.saveAll(validUserTokens);
+    }
+
+
 
 
     public void register(RegistrationRequest request) throws MessagingException, InstanceAlreadyExistsException {
@@ -106,14 +146,21 @@ public class AuthenticationServiceImpl  implements AuthenticationService {
                         request.getEmail(),
                         request.getPassword())
         );
-        var claims = new HashMap<String, Object>();
-        var user = ((UserDetails)auth.getPrincipal());
-        //var user = userRepository.findByEmail(request.getEmail())
-        //        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        claims.put("username", user.getUsername());
-        var jwtToken = jwtServiceImpl.generateToken(claims, user);
-        //rating.updateScore((User) auth.getPrincipal(), 5);
-        return AuthenticationResponse.builder().token(jwtToken).build();
+        var userDetails = (UserDetails) auth.getPrincipal();
+        var user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        var accessToken = jwtServiceImpl.generateToken(new HashMap<>(), userDetails);
+        var refreshToken = jwtServiceImpl.generateRefreshToken(userDetails);
+
+        revokeAllUserTokens(user);
+        saveUserToken(user, accessToken, TokenType.ACCESS);
+        saveUserToken(user, accessToken, TokenType.REFRESH);
+
+        return AuthenticationResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 
     public void activateAccount(String token) throws MessagingException {

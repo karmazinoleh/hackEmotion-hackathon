@@ -14,6 +14,7 @@ import org.springframework.security.core.GrantedAuthority;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -23,6 +24,9 @@ public class JwtServiceImpl implements JwtService {
     private String secretKey;
     @Value("${application.security.jwt.expiration}")
     private long jwtExpiration;
+    @Value("${application.security.jwt.refresh-token.expiration}")
+    private long refreshExpiration;
+
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -35,6 +39,10 @@ public class JwtServiceImpl implements JwtService {
 
     public String generateToken(UserDetails userDetails) {
         return generateToken(new HashMap<>(), userDetails);
+    }
+
+    public String generateRefreshToken(UserDetails userDetails) {
+        return buildToken(new HashMap<>(), userDetails, refreshExpiration);
     }
 
     public String generateToken(
@@ -62,6 +70,13 @@ public class JwtServiceImpl implements JwtService {
                 .claim("authorities", authorities)
                 .signWith(getSignInKey())
                 .compact();
+    }
+
+    public boolean hasRole(String token, String role) {
+        Claims claims = extractAllClaims(token.replace("Bearer ", ""));
+        var authorities = (List<String>) claims.get("authorities");
+
+        return authorities != null && authorities.contains(role);
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
