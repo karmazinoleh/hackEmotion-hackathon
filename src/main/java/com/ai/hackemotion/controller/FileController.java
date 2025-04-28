@@ -1,9 +1,12 @@
 package com.ai.hackemotion.controller;
 
 import com.ai.hackemotion.dto.request.UserAssetEmotionRequest;
+import com.ai.hackemotion.security.service.impl.JwtServiceImpl;
 import com.ai.hackemotion.service.AssetService;
 import com.ai.hackemotion.service.impl.AmazonS3ServiceImpl;
 import com.ai.hackemotion.service.impl.AssetServiceImpl;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,15 +24,12 @@ import java.util.zip.ZipOutputStream;
 
 @RestController
 @RequestMapping("/api/files")
+@RequiredArgsConstructor
 public class FileController {
 
     private final AmazonS3ServiceImpl amazonS3ServiceImpl;
     private final AssetServiceImpl assetServiceImpl;
-
-    public FileController(AmazonS3ServiceImpl amazonS3ServiceImpl, AssetServiceImpl assetServiceImpl) {
-        this.amazonS3ServiceImpl = amazonS3ServiceImpl;
-        this.assetServiceImpl = assetServiceImpl;
-    }
+    private final JwtServiceImpl jwtServiceImpl;
 
     @PostMapping("/upload")
     public ResponseEntity<Map<String, String>> uploadFile(@RequestParam("file") MultipartFile file) {
@@ -51,19 +51,34 @@ public class FileController {
     }
 
     @GetMapping("/{fileName}")
-    public ResponseEntity<byte[]> getFile(@PathVariable String fileName) throws IOException {
-        byte[] fileData = amazonS3ServiceImpl.downloadFile(fileName);
+    public ResponseEntity<byte[]> getFile(HttpServletRequest request, @PathVariable String fileName) throws IOException {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new RuntimeException("Missing or invalid Authorization header");
+        }
+        String token = authHeader.substring(7);
+        String username = jwtServiceImpl.extractUsername(token);
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName + "\"")
-                .contentType(MediaType.IMAGE_JPEG)
-                .body(fileData);
+        if (token == null) { // TODO: AOP
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        if(assetServiceImpl.isAssetAvailableForUser(fileName, username)){
+            byte[] fileData = amazonS3ServiceImpl.downloadFile(fileName);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName + "\"")
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(fileData);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
-    @GetMapping("/download/{userName}")
-    public ResponseEntity<byte[]> downloadFiles(@PathVariable String userName) throws IOException{
+    @GetMapping("/download")
+    public ResponseEntity<byte[]> downloadFiles(HttpServletRequest request) throws IOException{
+        String token = request.getHeader("Authorization");
+        String username = jwtServiceImpl.extractUsername(token);
 
-        List<UserAssetEmotionRequest> assets = assetServiceImpl.getAssetsByUsername(userName);
+        List<UserAssetEmotionRequest> assets = assetServiceImpl.getAssetsByUsername(username);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         ZipOutputStream zipOut = new ZipOutputStream(byteArrayOutputStream);
 

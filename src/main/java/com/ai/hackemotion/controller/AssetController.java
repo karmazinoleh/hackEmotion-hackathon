@@ -53,15 +53,18 @@ public class AssetController {
 
     @GetMapping("/")
     public ResponseEntity<List<UserAssetEmotionRequest>> getAssets(HttpServletRequest request) {
-        String token = request.getHeader("Authorization");
-        String cleanToken = token.replace("Bearer ", "");
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new RuntimeException("Missing or invalid Authorization header");
+        }
+        String token = authHeader.substring(7);
         String username = jwtServiceImpl.extractUsername(token);
 
-        if (token == null || !token.startsWith("Bearer ")) {
+        if (token == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        if(jwtServiceImpl.hasRole(cleanToken, "ADMIN")){
+        if(jwtServiceImpl.hasRole(token, "ADMIN")){
             return ResponseEntity.ok(new ArrayList<>(assetServiceImpl.getAllAssets()));
         } else {
             return ResponseEntity.ok(new ArrayList<>(assetServiceImpl.getAssetsByUsername(username)));

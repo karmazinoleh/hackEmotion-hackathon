@@ -13,6 +13,7 @@ import com.ai.hackemotion.entity.User;
 import com.ai.hackemotion.repository.UserRepository;
 import com.ai.hackemotion.service.AssetService;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -21,25 +22,14 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class AssetServiceImpl implements AssetService {
+
     private final AssetRepository assetRepository;
     private final EmotionRepository emotionRepository;
     private final UserAssetEmotionRepository userAssetEmotionRepository;
     private final UserRepository userRepository;
 
-    public AssetServiceImpl(AssetRepository assetRepository, EmotionRepository emotionRepository, UserAssetEmotionRepository userAssetEmotionRepository, UserRepository userRepository) {
-        this.assetRepository = assetRepository;
-        this.emotionRepository = emotionRepository;
-        this.userAssetEmotionRepository = userAssetEmotionRepository;
-        this.userRepository = userRepository;
-    }
-
-    /*public List<String> getEmotionNamesByAssetId(Long assetId) {
-        Asset asset = assetRepository.findById(assetId)
-                .orElseThrow(() -> new RuntimeException("Asset not found with id: " + assetId));
-
-        return userAssetEmotionRepository.findEmotionsByAssetId(asset.getId());
-    }*/
 
     public Asset createAsset(AssetRequest request) {
         User user = userRepository.findByUsername(request.getUsername())
@@ -110,6 +100,18 @@ public class AssetServiceImpl implements AssetService {
         }
 
         return new ArrayList<>(assetMap.values());
+    }
+
+    public boolean isAssetAvailableForUser(String assetName, String username) {
+        var user = userRepository.findByUsername(username);
+        List<Asset> assets = assetRepository.findByUserId(user.get().getId());
+
+        if (assets == null || assetName == null) {
+            return false;
+        }
+
+        return assets.stream()
+                .anyMatch(asset -> assetName.equals(asset.getName()));
     }
 
 }
