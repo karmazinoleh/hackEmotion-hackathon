@@ -22,9 +22,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(&quot;asset&quot;)
@@ -32,85 +32,87 @@ import java.util.stream.Collectors;
 public class AssetController {
     private final AssetServiceImpl assetServiceImpl;
     private final EmotionServiceImpl service;
-    private final UserAssetEmotionRepository UAErepository;
+    private final UserAssetEmotionRepository userAssetEmotionRepository;
     private final UserRepository userRepository;
     private final AssetRepository assetRepository;
     private final EmotionRepository emotionRepository;
     private final FinalAssetEmotionServiceImpl finalAssetEmotionServiceImpl;
     private final JwtServiceImpl jwtServiceImpl;
+    String authorizationHeader = &quot;Authorization&quot;;
 
     @PostMapping(&quot;/{assetId}/add-emotions&quot;)
     public ResponseEntity&lt;Asset&gt; addEmotions(
             @PathVariable Long assetId,
-            @RequestBody EmotionRequest request) {
-<span class="nc" id="L46">        return ResponseEntity.ok(assetServiceImpl.addEmotionsToAsset(assetId, request));</span>
+<span class="nc" id="L46">            @RequestBody EmotionRequest request) {</span>
+        return ResponseEntity.ok(assetServiceImpl.addEmotionsToAsset(assetId, request));
     }
 
     @PostMapping(&quot;/create-asset&quot;)
-    public ResponseEntity&lt;Asset&gt; createAsset(@RequestBody AssetRequest request) {
-<span class="nc" id="L51">        return ResponseEntity.ok(assetServiceImpl.createAsset(request));</span>
+<span class="nc" id="L51">    public ResponseEntity&lt;Asset&gt; createAsset(@RequestBody AssetRequest request) {</span>
+        return ResponseEntity.ok(assetServiceImpl.createAsset(request));
     }
 
     @GetMapping(&quot;/&quot;)
-    public ResponseEntity&lt;List&lt;UserAssetEmotionRequest&gt;&gt; getAssets(HttpServletRequest request) {
-<span class="nc" id="L56">        String authHeader = request.getHeader(&quot;Authorization&quot;);</span>
-<span class="nc bnc" id="L57" title="All 4 branches missed.">        if (authHeader == null || !authHeader.startsWith(&quot;Bearer &quot;)) {</span>
-<span class="nc" id="L58">            throw new RuntimeException(&quot;Missing or invalid Authorization header&quot;);</span>
+<span class="nc" id="L56">    public ResponseEntity&lt;List&lt;UserAssetEmotionRequest&gt;&gt; getAssets(HttpServletRequest request) {</span>
+<span class="nc bnc" id="L57" title="All 4 branches missed.">        String authHeader = request.getHeader(authorizationHeader);</span>
+<span class="nc" id="L58">        if (authHeader == null || !authHeader.startsWith(&quot;Bearer &quot;)) {</span>
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, &quot;Missing or invalid Authorization header&quot;);
+<span class="nc" id="L60">        }</span>
+<span class="nc" id="L61">        String token = authHeader.substring(7);</span>
+        String username = jwtServiceImpl.extractUsername(token);
+<span class="nc bnc" id="L63" title="All 2 branches missed."></span>
+<span class="nc" id="L64">        if (token == null) {</span>
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-<span class="nc" id="L60">        String token = authHeader.substring(7);</span>
-<span class="nc" id="L61">        String username = jwtServiceImpl.extractUsername(token);</span>
-
-<span class="nc bnc" id="L63" title="All 2 branches missed.">        if (token == null) {</span>
-<span class="nc" id="L64">            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();</span>
-        }
-
-<span class="nc bnc" id="L67" title="All 2 branches missed.">        if(jwtServiceImpl.hasRole(token, &quot;ADMIN&quot;)){</span>
-<span class="nc" id="L68">            return ResponseEntity.ok(new ArrayList&lt;&gt;(assetServiceImpl.getAllAssets()));</span>
-        } else {
-<span class="nc" id="L70">            return ResponseEntity.ok(new ArrayList&lt;&gt;(assetServiceImpl.getAssetsByUsername(username)));</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed."></span>
+<span class="nc" id="L68">        if(jwtServiceImpl.hasRole(token, &quot;ADMIN&quot;)){</span>
+            return ResponseEntity.ok(new ArrayList&lt;&gt;(assetServiceImpl.getAllAssets()));
+<span class="nc" id="L70">        } else {</span>
+            return ResponseEntity.ok(new ArrayList&lt;&gt;(assetServiceImpl.getAssetsByUsername(username)));
         }
     }
 
     @GetMapping(&quot;/rate&quot;)
-    public ResponseEntity&lt;List&lt;AssetResponse&gt;&gt; getAssetsToRate(HttpServletRequest request) {
-<span class="nc" id="L76">        String username = jwtServiceImpl.extractUsername(request.getHeader(&quot;Authorization&quot;));</span>
-
-<span class="nc" id="L78">        User user = userRepository.findByUsername(username)</span>
-<span class="nc" id="L79">                .orElseThrow(() -&gt; new RuntimeException(&quot;User not found&quot;));</span>
-
-<span class="nc" id="L81">        List&lt;AssetResponse&gt; assetsToRate = assetServiceImpl.getAssetsToRate(user.getId());</span>
-
-<span class="nc" id="L83">        return ResponseEntity.ok(assetsToRate);</span>
+<span class="nc" id="L76">    public ResponseEntity&lt;List&lt;AssetResponse&gt;&gt; getAssetsToRate(HttpServletRequest request) {</span>
+        String username = jwtServiceImpl.extractUsername(request.getHeader(authorizationHeader));
+<span class="nc" id="L78"></span>
+<span class="nc" id="L79">        User user = userRepository.findByUsername(username)</span>
+                .orElseThrow(() -&gt; new RuntimeException(&quot;User not found&quot;));
+<span class="nc" id="L81"></span>
+        List&lt;AssetResponse&gt; assetsToRate = assetServiceImpl.getAssetsToRate(user.getId());
+<span class="nc" id="L83"></span>
+        return ResponseEntity.ok(assetsToRate);
     }
 
     @PostMapping(&quot;/rate&quot;)
-    public ResponseEntity&lt;HttpStatus&gt; voteForEmotion(HttpServletRequest request, @RequestBody VoteRequest voteRequest) {
-<span class="nc" id="L88">        String username = jwtServiceImpl.extractUsername(request.getHeader(&quot;Authorization&quot;));</span>
-<span class="nc" id="L89">        User user = userRepository.findByUsername(username)</span>
-<span class="nc" id="L90">                .orElseThrow(() -&gt; new RuntimeException(&quot;User not found&quot;));</span>
-<span class="nc" id="L91">        Long assetId = voteRequest.getAssetId();</span>
+<span class="nc" id="L88">    public ResponseEntity&lt;HttpStatus&gt; voteForEmotion(HttpServletRequest request, @RequestBody VoteRequest voteRequest) {</span>
+<span class="nc" id="L89">        String username = jwtServiceImpl.extractUsername(request.getHeader(authorizationHeader));</span>
+<span class="nc" id="L90">        User user = userRepository.findByUsername(username)</span>
+<span class="nc" id="L91">                .orElseThrow(() -&gt; new RuntimeException(&quot;User not found&quot;));</span>
+        Long assetId = voteRequest.getAssetId();
 
-        // Check if user has already rated this asset
-<span class="nc" id="L94">        boolean alreadyRated = UAErepository.existsByUserIdAndAssetId(user.getId(), assetId);</span>
-<span class="nc bnc" id="L95" title="All 2 branches missed.">        if (alreadyRated) {</span>
-<span class="nc" id="L96">            return ResponseEntity.badRequest().body(HttpStatus.CONFLICT);</span>
-        }
+<span class="nc" id="L94">        // Check if user has already rated this asset</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">        boolean alreadyRated = userAssetEmotionRepository</span>
+<span class="nc" id="L96">                .existsByUserIdAndAssetId(user.getId(), assetId);</span>
+        if (alreadyRated) {
+            return ResponseEntity.badRequest().body(HttpStatus.CONFLICT);
+<span class="nc" id="L99">        }</span>
+<span class="nc" id="L100"></span>
+        Asset asset = assetRepository.findById(assetId)
+<span class="nc" id="L102">                .orElseThrow(() -&gt; new RuntimeException(&quot;Asset not found&quot;));</span>
+<span class="nc" id="L103"></span>
+        Emotion emotion = emotionRepository.findById(voteRequest.getEmotionId())
+<span class="nc" id="L105">                .orElseThrow(() -&gt; new RuntimeException(&quot;Emotion not found&quot;));</span>
+<span class="nc" id="L106"></span>
+<span class="nc" id="L107">        UserAssetEmotion vote = new UserAssetEmotion();</span>
+<span class="nc" id="L108">        vote.setUser(user);</span>
+        vote.setAsset(asset);
+<span class="nc" id="L110">        vote.setEmotion(emotion);</span>
+<span class="nc" id="L111"></span>
+        userAssetEmotionRepository.save(vote);
+<span class="nc" id="L113">        finalAssetEmotionServiceImpl.updateFinalEmotion(assetId);</span>
 
-<span class="nc" id="L99">        Asset asset = assetRepository.findById(assetId)</span>
-<span class="nc" id="L100">                .orElseThrow(() -&gt; new RuntimeException(&quot;Asset not found&quot;));</span>
-
-<span class="nc" id="L102">        Emotion emotion = emotionRepository.findById(voteRequest.getEmotionId())</span>
-<span class="nc" id="L103">                .orElseThrow(() -&gt; new RuntimeException(&quot;Emotion not found&quot;));</span>
-
-<span class="nc" id="L105">        UserAssetEmotion vote = new UserAssetEmotion();</span>
-<span class="nc" id="L106">        vote.setUser(user);</span>
-<span class="nc" id="L107">        vote.setAsset(asset);</span>
-<span class="nc" id="L108">        vote.setEmotion(emotion);</span>
-
-<span class="nc" id="L110">        UAErepository.save(vote);</span>
-<span class="nc" id="L111">        finalAssetEmotionServiceImpl.updateFinalEmotion(assetId);</span>
-
-<span class="nc" id="L113">        return ResponseEntity.ok(HttpStatus.ACCEPTED);</span>
+        return ResponseEntity.ok(HttpStatus.ACCEPTED);
     }
 
 

@@ -2,7 +2,6 @@ package com.ai.hackemotion.controller;
 
 import com.ai.hackemotion.dto.request.UserAssetEmotionRequest;
 import com.ai.hackemotion.security.service.impl.JwtServiceImpl;
-import com.ai.hackemotion.service.AssetService;
 import com.ai.hackemotion.service.impl.AmazonS3ServiceImpl;
 import com.ai.hackemotion.service.impl.AssetServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -54,12 +54,12 @@ public class FileController {
     public ResponseEntity<byte[]> getFile(HttpServletRequest request, @PathVariable String fileName) throws IOException {
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new RuntimeException("Missing or invalid Authorization header");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing or invalid Authorization header");
         }
         String token = authHeader.substring(7);
         String username = jwtServiceImpl.extractUsername(token);
 
-        if (token == null) { // TODO: AOP
+        if (token == null) { // AOP
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         if(assetServiceImpl.isAssetAvailableForUser(fileName, username)){

@@ -12,52 +12,55 @@ import java.util.Map;
 
 @RestControllerAdvice
 <span class="fc" id="L14">public class GlobalExceptionHandler {</span>
+    String bodyStatus = &quot;status&quot;;
+    String bodyError = &quot;error&quot;;
+    String bodyMessage = &quot;message&quot;;
 
-    // RuntimeException
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleRuntimeException(RuntimeException ex) {
-<span class="nc" id="L19">        Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();</span>
-<span class="nc" id="L20">        body.put(&quot;status&quot;, HttpStatus.BAD_REQUEST.value());</span>
-<span class="nc" id="L21">        body.put(&quot;error&quot;, &quot;Bad Request&quot;);</span>
-<span class="nc" id="L22">        body.put(&quot;message&quot;, ex.getMessage());</span>
-<span class="nc" id="L23">        return new ResponseEntity&lt;&gt;(body, HttpStatus.BAD_REQUEST);</span>
+<span class="nc" id="L19">    // RuntimeException</span>
+<span class="nc" id="L20">    @ExceptionHandler(RuntimeException.class)</span>
+<span class="nc" id="L21">    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleRuntimeException(RuntimeException ex) {</span>
+<span class="nc" id="L22">        Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L23">        body.put(bodyStatus, HttpStatus.BAD_REQUEST.value());</span>
+        body.put(bodyError, &quot;Bad Request&quot;);
+        body.put(bodyMessage, ex.getMessage());
+        return new ResponseEntity&lt;&gt;(body, HttpStatus.BAD_REQUEST);
     }
 
-    // AccessDeniedException
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleAccessDeniedException(AccessDeniedException ex) {
-<span class="nc" id="L29">        Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();</span>
-<span class="nc" id="L30">        body.put(&quot;status&quot;, HttpStatus.FORBIDDEN.value());</span>
-<span class="nc" id="L31">        body.put(&quot;error&quot;, &quot;Forbidden&quot;);</span>
-<span class="nc" id="L32">        body.put(&quot;message&quot;, &quot;You don't have permission to access this resource&quot;);</span>
-<span class="nc" id="L33">        return new ResponseEntity&lt;&gt;(body, HttpStatus.FORBIDDEN);</span>
+<span class="nc" id="L29">    // AccessDeniedException</span>
+<span class="nc" id="L30">    @ExceptionHandler(AccessDeniedException.class)</span>
+<span class="nc" id="L31">    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleAccessDeniedException(AccessDeniedException ex) {</span>
+<span class="nc" id="L32">        Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L33">        body.put(bodyStatus, HttpStatus.FORBIDDEN.value());</span>
+        body.put(bodyError, &quot;Forbidden&quot;);
+        body.put(bodyMessage, &quot;You don't have permission to access this resource&quot;);
+        return new ResponseEntity&lt;&gt;(body, HttpStatus.FORBIDDEN);
     }
 
-    // @Valid
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleValidationException(MethodArgumentNotValidException ex) {
-<span class="nc" id="L39">        Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();</span>
-<span class="nc" id="L40">        body.put(&quot;status&quot;, HttpStatus.BAD_REQUEST.value());</span>
-<span class="nc" id="L41">        body.put(&quot;error&quot;, &quot;Validation Error&quot;);</span>
+<span class="nc" id="L39">    // @Valid</span>
+<span class="nc" id="L40">    @ExceptionHandler(MethodArgumentNotValidException.class)</span>
+<span class="nc" id="L41">    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleValidationException(MethodArgumentNotValidException ex) {</span>
+        Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();
+<span class="nc" id="L43">        body.put(bodyStatus, HttpStatus.BAD_REQUEST.value());</span>
+<span class="nc" id="L44">        body.put(bodyError, &quot;Validation Error&quot;);</span>
+<span class="nc" id="L45"></span>
+        Map&lt;String, String&gt; validationErrors = new HashMap&lt;&gt;();
+<span class="nc" id="L47">        ex.getBindingResult().getFieldErrors().forEach(error -&gt;</span>
+<span class="nc" id="L48">                validationErrors.put(error.getField(), error.getDefaultMessage()));</span>
 
-<span class="nc" id="L43">        Map&lt;String, String&gt; validationErrors = new HashMap&lt;&gt;();</span>
-<span class="nc" id="L44">        ex.getBindingResult().getFieldErrors().forEach(error -&gt;</span>
-<span class="nc" id="L45">                validationErrors.put(error.getField(), error.getDefaultMessage()));</span>
+<span class="nc" id="L50">        body.put(bodyMessage, &quot;Validation failed&quot;);</span>
+        body.put(&quot;details&quot;, validationErrors);
 
-<span class="nc" id="L47">        body.put(&quot;message&quot;, &quot;Validation failed&quot;);</span>
-<span class="nc" id="L48">        body.put(&quot;details&quot;, validationErrors);</span>
-
-<span class="nc" id="L50">        return new ResponseEntity&lt;&gt;(body, HttpStatus.BAD_REQUEST);</span>
+        return new ResponseEntity&lt;&gt;(body, HttpStatus.BAD_REQUEST);
     }
 
-    // All other exceptions
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleException(Exception ex) {
-<span class="nc" id="L56">        Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();</span>
-<span class="nc" id="L57">        body.put(&quot;status&quot;, HttpStatus.INTERNAL_SERVER_ERROR.value());</span>
-<span class="nc" id="L58">        body.put(&quot;error&quot;, &quot;Internal Server Error&quot;);</span>
-<span class="nc" id="L59">        body.put(&quot;message&quot;, ex.getMessage());</span>
-<span class="nc" id="L60">        return new ResponseEntity&lt;&gt;(body, HttpStatus.INTERNAL_SERVER_ERROR);</span>
+<span class="nc" id="L56">    // All other exceptions</span>
+<span class="nc" id="L57">    @ExceptionHandler(Exception.class)</span>
+<span class="nc" id="L58">    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleException(Exception ex) {</span>
+<span class="nc" id="L59">        Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L60">        body.put(bodyStatus, HttpStatus.INTERNAL_SERVER_ERROR.value());</span>
+        body.put(bodyError, &quot;Internal Server Error&quot;);
+        body.put(bodyMessage, ex.getMessage());
+        return new ResponseEntity&lt;&gt;(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

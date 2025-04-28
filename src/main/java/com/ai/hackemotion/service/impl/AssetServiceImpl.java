@@ -67,24 +67,20 @@ public class AssetServiceImpl implements AssetService {
     }
 
     public List<AssetResponse> getAssetsToRate(Long userId) {
-        // Отримуємо всі активи, які не створені користувачем
         List<Asset> allAssets = assetRepository.findAllByUserIdNot(userId);
 
-        // Отримуємо всі активи, які користувач вже оцінив
         List<UserAssetEmotion> userRatings = userAssetEmotionRepository.findAllByUserId(userId);
         Set<Long> ratedAssetIds = userRatings.stream()
                 .map(rating -> rating.getAsset().getId())
                 .collect(Collectors.toSet());
 
-        // Фільтруємо активи, які ще не були оцінені
         List<Asset> assetsToRate = allAssets.stream()
                 .filter(asset -> !ratedAssetIds.contains(asset.getId()))
-                .collect(Collectors.toList());
+                .toList();
 
-        // Перетворюємо в об'єкти відповіді
         return assetsToRate.stream()
                 .map(asset -> new AssetResponse(asset.getId(), asset.getName(), asset.getUrl()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public List<UserAssetEmotionRequest> getAssetsByUsername(String username) {
@@ -124,6 +120,8 @@ public class AssetServiceImpl implements AssetService {
 
     public boolean isAssetAvailableForUser(String assetName, String username) {
         var user = userRepository.findByUsername(username);
+        if (!user.isPresent()) {throw new EntityNotFoundException("User not found");}
+
         List<Asset> assets = assetRepository.findByUserId(user.get().getId());
 
         if (assets == null || assetName == null) {

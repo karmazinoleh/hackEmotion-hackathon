@@ -118,7 +118,7 @@ class AuthenticationServiceImplTest {
 
         when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
         when(jwtServiceImpl.generateToken(anyMap(), eq(user))).thenReturn("accessToken");
-        when(jwtServiceImpl.generateRefreshToken(eq(user))).thenReturn("refreshToken");
+        when(jwtServiceImpl.generateRefreshToken(user)).thenReturn("refreshToken");
 
         AuthenticationResponse response = authenticationService.authenticate(request);
 
