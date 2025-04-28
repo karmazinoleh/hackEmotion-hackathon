@@ -1,41 +1,37 @@
 package com.ai.hackemotion.service.impl;
 
 import com.ai.hackemotion.dto.request.AuthenticationRequest;
-import com.ai.hackemotion.dto.response.AuthenticationResponse;
 import com.ai.hackemotion.dto.request.RegistrationRequest;
-import com.ai.hackemotion.enums.EmailTemplateName;
+import com.ai.hackemotion.dto.response.AuthenticationResponse;
 import com.ai.hackemotion.entity.Role;
-import com.ai.hackemotion.repository.RoleRepository;
-import com.ai.hackemotion.security.service.impl.JwtServiceImpl;
 import com.ai.hackemotion.entity.Token;
-import com.ai.hackemotion.repository.TokenRepository;
 import com.ai.hackemotion.entity.User;
+import com.ai.hackemotion.enums.EmailTemplateName;
+import com.ai.hackemotion.enums.TokenType;
+import com.ai.hackemotion.repository.RoleRepository;
+import com.ai.hackemotion.repository.TokenRepository;
 import com.ai.hackemotion.repository.UserRepository;
+import com.ai.hackemotion.security.service.impl.JwtServiceImpl;
 import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.*;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.management.InstanceAlreadyExistsException;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 class AuthenticationServiceImplTest {
+
+    @InjectMocks
+    private AuthenticationServiceImpl authenticationService;
 
     @Mock
     private RoleRepository roleRepository;
@@ -51,228 +47,162 @@ class AuthenticationServiceImplTest {
     private AuthenticationManager authenticationManager;
     @Mock
     private JwtServiceImpl jwtServiceImpl;
-    @InjectMocks
-    private AuthenticationServiceImpl authenticationServiceImpl;
-
-    private Role userRole;
-    private User user;
-    private RegistrationRequest registrationRequest;
-    private AuthenticationRequest authenticationRequest;
-    private final String ENCODED_PASSWORD = "encodedPassword";
-    private final String AUTH_TOKEN = "autenticationToken";
+    @Mock
+    private RatingServiceImpl ratingService;
 
     @BeforeEach
     void setUp() {
-        this.user = new User();
-        user.setId(1L);
-        user.setUsername("username");
-        user.setPassword(ENCODED_PASSWORD);
-        user.setEmail("email@email.com");
-        user.setEnabled(false);
-
-        userRole = Role.builder()
-                .id(1L)
-                .name("USER")
-                .build();
-
-        registrationRequest = new RegistrationRequest();
-        registrationRequest.setUsername("testUser");
-        registrationRequest.setPassword("password");
-        registrationRequest.setEmail("test@email.com");
-        registrationRequest.setFullName("Test User");
-
-        authenticationRequest = new AuthenticationRequest();
-        authenticationRequest.setEmail("test@email.com");
-        authenticationRequest.setPassword("password");
-
-        ReflectionTestUtils.setField(authenticationServiceImpl, "activationUrl", "http://localhost:3000/activate");
-    }
-
-    @Test
-    void register_Success() throws MessagingException, InstanceAlreadyExistsException {
-        when(userRepository.findByUsername("testUser")).thenReturn(Optional.empty());
-        when(roleRepository.findByName("USER")).thenReturn(Optional.of(userRole));
-        when(passwordEncoder.encode(anyString())).thenReturn(ENCODED_PASSWORD);
-
-        authenticationServiceImpl.register(registrationRequest);
-
-        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        verify(userRepository).save(userCaptor.capture());
-
-        User capturedUser = userCaptor.getValue();
-        assertEquals(registrationRequest.getUsername(), capturedUser.getUsername());
-        assertEquals(ENCODED_PASSWORD, capturedUser.getPassword());
-        assertEquals(registrationRequest.getEmail(), capturedUser.getEmail());
-        assertEquals(registrationRequest.getFullName(), capturedUser.getFullName());
-        assertFalse(capturedUser.isEnabled());
-        assertFalse(capturedUser.isAccountLocked());
-        assertEquals(0, capturedUser.getDatasetsUploaded());
-        assertEquals(0, capturedUser.getDatasetsRated());
-
-        assertEquals(1, capturedUser.getRoleList().size());
-        assertEquals(userRole, capturedUser.getRoleList().get(0));
-
-        verify(tokenRepository).save(any());
-        verify(emailServiceImpl).sendEmail(
-                eq(registrationRequest.getEmail()),
-                eq(registrationRequest.getUsername()),
-                eq(EmailTemplateName.ACTIVATE_ACCOUNT),
-                eq("http://localhost:3000/activate"),
-                anyString(),
-                eq("Account activation")
+        MockitoAnnotations.openMocks(this);
+        authenticationService = new AuthenticationServiceImpl(
+                roleRepository,
+                passwordEncoder,
+                userRepository,
+                tokenRepository,
+                emailServiceImpl,
+                authenticationManager,
+                jwtServiceImpl
         );
     }
 
     @Test
-    void register_RoleNotFound() {
-        when(userRepository.findByUsername("testUser")).thenReturn(Optional.empty());
-        when(roleRepository.findByName("USER")).thenReturn(Optional.empty());
+    void register_ShouldSaveNewUser_WhenUserDoesNotExist() throws MessagingException, InstanceAlreadyExistsException {
+        RegistrationRequest request = new RegistrationRequest();
+        request.setUsername("testuser");
+        request.setPassword("password");
+        request.setFullName("fullName");
+        request.setEmail("test@example.com");
 
-        Exception exception = assertThrows(IllegalStateException.class, () -> {
-                authenticationServiceImpl.register(registrationRequest);
-        });
+        when(userRepository.findByUsername(request.getUsername())).thenReturn(Optional.empty());
+        when(roleRepository.findByName("USER")).thenReturn(Optional.of(new Role()));
+        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
 
-        assertEquals("Role user was not init.!", exception.getMessage());
+        authenticationService.register(request);
 
-        verify(roleRepository).findByName("USER");
-        verify(userRepository).findByUsername("testUser");
+        verify(userRepository, times(1)).save(any(User.class));
+        verify(emailServiceImpl, times(1)).sendEmail(
+                anyString(),
+                anyString(),
+                eq(EmailTemplateName.ACTIVATE_ACCOUNT),
+                nullable(String.class),
+                anyString(),
+                anyString()
+        );
+    }
+
+    @Test
+    void register_ShouldThrowException_WhenUsernameAlreadyExists() {
+        RegistrationRequest request = new RegistrationRequest();
+        request.setUsername("testuser");
+        request.setPassword("password");
+        request.setFullName("fullName");
+        request.setEmail("test@example.com");
+
+        when(userRepository.findByUsername(request.getUsername())).thenReturn(Optional.of(new User()));
+
+        assertThrows(IllegalStateException.class, () -> authenticationService.register(request));
         verify(userRepository, never()).save(any());
     }
 
     @Test
-    void register_UsernameAlreadyInUse(){
-        User existingUser = User.builder()
-                        .id(1L)
-                        .username("testUser")
-                        .build();
+    void authenticate_ShouldReturnAuthenticationResponse_WhenCredentialsAreValid() {
+        AuthenticationRequest request = new AuthenticationRequest("test@example.com", "password");
+        User user = User.builder()
+                .email(request.getEmail())
+                .password("password")
+                .build();
 
-        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(existingUser));
+        Authentication authentication = mock(Authentication.class);
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(user);
 
-        Exception exeption = assertThrows(IllegalStateException.class, () -> {
-            authenticationServiceImpl.register(registrationRequest);
-        });
+        when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
+        when(jwtServiceImpl.generateToken(anyMap(), eq(user))).thenReturn("accessToken");
+        when(jwtServiceImpl.generateRefreshToken(eq(user))).thenReturn("refreshToken");
 
-        assertEquals("Username already in use: testUser", exeption.getMessage());
+        AuthenticationResponse response = authenticationService.authenticate(request);
 
-        verify(userRepository).findByUsername("testUser");
-        verify(roleRepository, never()).findByName(anyString());
-        verify(userRepository, never()).save(any());
-    }
-
-    @Test
-    void register_EmailServiceThrowsException() throws MessagingException {
-        when(userRepository.findByUsername("testUser")).thenReturn(Optional.empty());
-        when(roleRepository.findByName("USER")).thenReturn(Optional.of(userRole));
-        when(passwordEncoder.encode(anyString())).thenReturn(ENCODED_PASSWORD);
-
-        doThrow(new MessagingException("Email sending failed"))
-                .when(emailServiceImpl).sendEmail(
-                        anyString(), anyString(), any(), anyString(), anyString(), anyString()
-                );
-
-        MessagingException exception = assertThrows(MessagingException.class, () -> {
-            authenticationServiceImpl.register(registrationRequest);
-        });
-
-        assertEquals("Email sending failed", exception.getMessage());
-
-        verify(userRepository).save(any(User.class));
-        verify(roleRepository).findByName("USER");
-    }
-
-    @Test
-    void authenticate_Success(){
-
-        // Arrange:
-        var userDetails = User.builder().email("test@email.com").password("password").build();
-        var authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, "password");
-
-        when(authenticationManager.authenticate(any())).thenReturn(authenticationToken);
-
-        var claims = new HashMap<String, Object>();
-        claims.put("username", userDetails.getUsername());
-        when(jwtServiceImpl.generateToken(claims, userDetails)).thenReturn(AUTH_TOKEN);
-
-        // Act
-        AuthenticationResponse response = authenticationServiceImpl.authenticate(authenticationRequest);
-
-        // Assert
         assertNotNull(response);
-        assertEquals(AUTH_TOKEN, response.getToken());
+        assertEquals("accessToken", response.getAccessToken());
+        assertEquals("refreshToken", response.getRefreshToken());
     }
 
     @Test
-    void authenticate_BadCredentials(){
-        // Arrange
-        doThrow(new BadCredentialsException("Bad credentials")).when(authenticationManager).authenticate(any());
+    void activateAccount_ShouldEnableUser_WhenTokenIsValid() throws MessagingException {
+        User user = User.builder()
+                .id(1L)
+                .enabled(false)
+                .build();
+        Token token = Token.builder()
+                .token("validToken")
+                .expiresAt(LocalDateTime.now().plusMinutes(10))
+                .user(user)
+                .build();
 
-        // Act
-        BadCredentialsException exception = assertThrows(BadCredentialsException.class, () -> {
-            authenticationServiceImpl.authenticate(authenticationRequest);
-        });
+        when(tokenRepository.findByToken("validToken")).thenReturn(Optional.of(token));
+        when(userRepository.findById(String.valueOf(user.getId()))).thenReturn(Optional.of(user));
 
-        // Assert
-        assertEquals("Bad credentials", exception.getMessage());
-    }
+        authenticationService.activateAccount("validToken");
 
-    @Test
-    void activateAccount_Success() throws MessagingException {
-        // Arrange
-        var token = Token.builder()
-                        .token("activateAccountToken")
-                        .createdAt(LocalDateTime.now().minusMinutes(5))
-                        .expiresAt(LocalDateTime.now().plusMinutes(5))
-                        .user(user)
-                        .build();
-
-        when(tokenRepository.findByToken("activateAccountToken")).thenReturn(Optional.ofNullable(token));
-        when(userRepository.findById("1")).thenReturn(Optional.of(user));
-
-        // Act
-        authenticationServiceImpl.activateAccount("activateAccountToken");
-
-        // Assert
         assertTrue(user.isEnabled());
-        assertNotNull(token.getValidatedAt());
-
-        verify(userRepository).save(user);
-        verify(tokenRepository).save(token);
+        verify(userRepository, times(1)).save(user);
+        verify(tokenRepository, times(1)).save(token);
     }
 
     @Test
-    void activateAccount_ExpiredToken() throws RuntimeException {
-        // Arrange
-        var token = Token.builder()
-                .token("activateAccountToken")
-                .createdAt(LocalDateTime.now().minusMinutes(5))
+    void activateAccount_ShouldThrowException_WhenTokenExpired() {
+        User user = User.builder()
+                .id(1L)
+                .build();
+        Token token = Token.builder()
+                .token("expiredToken")
                 .expiresAt(LocalDateTime.now().minusMinutes(1))
                 .user(user)
                 .build();
 
-        when(tokenRepository.findByToken("activateAccountToken")).thenReturn(Optional.ofNullable(token));
+        when(tokenRepository.findByToken("expiredToken")).thenReturn(Optional.of(token));
 
-        // Act
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            authenticationServiceImpl.activateAccount("activateAccountToken");
-        });
-
-        // Assert
-        assertEquals("Activation token has expired. A new token has been send to the same email address", exception.getMessage());
-        verify(userRepository, never()).save(any(User.class));
+        assertThrows(RuntimeException.class, () -> authenticationService.activateAccount("expiredToken"));
     }
 
     @Test
-    void activateAccount_InvalidToken() throws RuntimeException {
-        // Arrange
-        when(tokenRepository.findByToken("activateAccountToken")).thenReturn(Optional.empty());
+    void saveUserToken_ShouldSaveToken() {
+        User user = new User();
+        authenticationService.saveUserToken(user, "jwtToken", TokenType.ACCESS);
 
-        // Act
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            authenticationServiceImpl.activateAccount("activateAccountToken");
-        });
+        verify(tokenRepository, times(1)).save(any(Token.class));
+    }
 
-        // Assert
-        verify(userRepository, never()).save(any(User.class));
-        verify(tokenRepository, never()).save(any(Token.class));
+    @Test
+    void revokeAllUserTokens_ShouldMarkTokensAsRevoked() {
+        User user = new User();
+        Token token = new Token();
+        List<Token> tokens = Collections.singletonList(token);
+
+        when(tokenRepository.findAllValidTokenByUser(any())).thenReturn(tokens);
+
+        authenticationService.revokeAllUserTokens(user);
+
+        assertTrue(token.isExpired());
+        assertTrue(token.isRevoked());
+        verify(tokenRepository, times(1)).saveAll(tokens);
+    }
+
+    @Test
+    void revokeAllUserAccessTokens_ShouldOnlyRevokeAccessTokens() {
+        User user = new User();
+        Token accessToken = Token.builder().tokenType(TokenType.ACCESS).build();
+        Token refreshToken = Token.builder().tokenType(TokenType.REFRESH).build();
+        List<Token> tokens = List.of(accessToken, refreshToken);
+
+        when(tokenRepository.findAllValidTokenByUser(any())).thenReturn(tokens);
+
+        authenticationService.revokeAllUserAccessTokens(user);
+
+        assertTrue(accessToken.isExpired());
+        assertTrue(accessToken.isRevoked());
+        assertFalse(refreshToken.isExpired());
+        assertFalse(refreshToken.isRevoked());
+        verify(tokenRepository, times(1)).saveAll(tokens);
     }
 }

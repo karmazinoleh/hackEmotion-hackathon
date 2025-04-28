@@ -32,26 +32,26 @@ public class FinalAssetEmotionServiceImpl implements FinalAssetEmotionService {
 
     @Transactional
     public void updateFinalEmotion(Long assetId) {
-<span class="fc" id="L35">        Asset asset = assetRepository.findById(assetId)</span>
-<span class="pc" id="L36">                .orElseThrow(() -&gt; new RuntimeException(&quot;Asset not found with id: &quot; + assetId));</span>
+<span class="nc" id="L35">        Asset asset = assetRepository.findById(assetId)</span>
+<span class="nc" id="L36">                .orElseThrow(() -&gt; new RuntimeException(&quot;Asset not found with id: &quot; + assetId));</span>
 
-<span class="fc" id="L38">        List&lt;UserAssetEmotion&gt; userAssetEmotions = userAssetEmotionRepository.findAllByAssetId(assetId);</span>
-<span class="fc" id="L39">        Map&lt;Emotion, Long&gt; emotionCount = userAssetEmotions.stream()</span>
-<span class="fc" id="L40">                .collect(Collectors.groupingBy(UserAssetEmotion::getEmotion, Collectors.counting()));</span>
+<span class="nc" id="L38">        List&lt;UserAssetEmotion&gt; userAssetEmotions = userAssetEmotionRepository.findAllByAssetId(assetId);</span>
+<span class="nc" id="L39">        Map&lt;Emotion, Long&gt; emotionCount = userAssetEmotions.stream()</span>
+<span class="nc" id="L40">                .collect(Collectors.groupingBy(UserAssetEmotion::getEmotion, Collectors.counting()));</span>
 
-<span class="fc" id="L42">        Emotion mostVotedEmotion = emotionCount.entrySet().stream()</span>
-<span class="fc" id="L43">                .max(Map.Entry.comparingByValue())</span>
-<span class="fc" id="L44">                .map(Map.Entry::getKey)</span>
-<span class="fc" id="L45">                .orElse(null);</span>
+<span class="nc" id="L42">        Emotion mostVotedEmotion = emotionCount.entrySet().stream()</span>
+<span class="nc" id="L43">                .max(Map.Entry.comparingByValue())</span>
+<span class="nc" id="L44">                .map(Map.Entry::getKey)</span>
+<span class="nc" id="L45">                .orElse(null);</span>
 
-<span class="fc" id="L47">        FinalAssetEmotion finalAssetEmotion = finalAssetEmotionRepository.findByAssetId(assetId)</span>
-<span class="fc" id="L48">                .orElse(new FinalAssetEmotion());</span>
+<span class="nc" id="L47">        FinalAssetEmotion finalAssetEmotion = finalAssetEmotionRepository.findByAssetId(assetId)</span>
+<span class="nc" id="L48">                .orElse(new FinalAssetEmotion());</span>
 
         // Set both the asset and assetId
-<span class="fc" id="L51">        finalAssetEmotion.setAsset(asset);</span>
-<span class="fc" id="L52">        finalAssetEmotion.setEmotion(mostVotedEmotion);</span>
+<span class="nc" id="L51">        finalAssetEmotion.setAsset(asset);</span>
+<span class="nc" id="L52">        finalAssetEmotion.setEmotion(mostVotedEmotion);</span>
 
-<span class="fc" id="L54">        finalAssetEmotionRepository.save(finalAssetEmotion);</span>
-<span class="fc" id="L55">    }</span>
+<span class="nc" id="L54">        finalAssetEmotionRepository.save(finalAssetEmotion);</span>
+<span class="nc" id="L55">    }</span>
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

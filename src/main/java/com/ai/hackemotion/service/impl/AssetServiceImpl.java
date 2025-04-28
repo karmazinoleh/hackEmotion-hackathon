@@ -1,6 +1,7 @@
 package com.ai.hackemotion.service.impl;
 
 import com.ai.hackemotion.dto.request.UserAssetEmotionRequest;
+import com.ai.hackemotion.dto.response.AssetResponse;
 import com.ai.hackemotion.entity.Asset;
 import com.ai.hackemotion.dto.request.AssetRequest;
 import com.ai.hackemotion.entity.Emotion;
@@ -16,10 +17,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -65,6 +64,27 @@ public class AssetServiceImpl implements AssetService {
         }
 
         return asset;
+    }
+
+    public List<AssetResponse> getAssetsToRate(Long userId) {
+        // Отримуємо всі активи, які не створені користувачем
+        List<Asset> allAssets = assetRepository.findAllByUserIdNot(userId);
+
+        // Отримуємо всі активи, які користувач вже оцінив
+        List<UserAssetEmotion> userRatings = userAssetEmotionRepository.findAllByUserId(userId);
+        Set<Long> ratedAssetIds = userRatings.stream()
+                .map(rating -> rating.getAsset().getId())
+                .collect(Collectors.toSet());
+
+        // Фільтруємо активи, які ще не були оцінені
+        List<Asset> assetsToRate = allAssets.stream()
+                .filter(asset -> !ratedAssetIds.contains(asset.getId()))
+                .collect(Collectors.toList());
+
+        // Перетворюємо в об'єкти відповіді
+        return assetsToRate.stream()
+                .map(asset -> new AssetResponse(asset.getId(), asset.getName(), asset.getUrl()))
+                .collect(Collectors.toList());
     }
 
     public List<UserAssetEmotionRequest> getAssetsByUsername(String username) {

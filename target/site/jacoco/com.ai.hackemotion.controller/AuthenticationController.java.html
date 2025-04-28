@@ -2,10 +2,15 @@
 
 import com.ai.hackemotion.dto.request.AuthenticationRequest;
 import com.ai.hackemotion.dto.response.AuthenticationResponse;
+import com.ai.hackemotion.enums.TokenType;
+import com.ai.hackemotion.repository.UserRepository;
+import com.ai.hackemotion.security.service.impl.JwtServiceImpl;
 import com.ai.hackemotion.service.impl.AuthenticationServiceImpl;
 import com.ai.hackemotion.dto.request.RegistrationRequest;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.management.InstanceAlreadyExistsException;
+import java.io.IOException;
 
 @RestController
 @RequestMapping(&quot;auth&quot;)
@@ -20,29 +26,67 @@ import javax.management.InstanceAlreadyExistsException;
 @Tag(name = &quot;Authentication&quot;)
 public class AuthenticationController {
 
-    private final AuthenticationServiceImpl service;
+    private final AuthenticationServiceImpl authenticationServiceImpl;
+    private final UserRepository userRepository;
+    private final JwtServiceImpl jwtServiceImpl;
 
     @PostMapping(&quot;/register&quot;)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity&lt;?&gt; register(
             @RequestBody @Valid RegistrationRequest request
     ) throws MessagingException, InstanceAlreadyExistsException {
-<span class="nc" id="L30">        service.register(request);</span>
-<span class="nc" id="L31">        return ResponseEntity.accepted().build();</span>
+<span class="fc" id="L38">        authenticationServiceImpl.register(request);</span>
+<span class="fc" id="L39">        return ResponseEntity.accepted().build();</span>
     }
 
     @PostMapping(&quot;/authenticate&quot;)
     public ResponseEntity&lt;AuthenticationResponse&gt; authenticate(
             @RequestBody @Valid AuthenticationRequest request
     ){
-<span class="nc" id="L38">        return ResponseEntity.ok(service.authenticate(request));</span>
+<span class="fc" id="L46">        return ResponseEntity.ok(authenticationServiceImpl.authenticate(request));</span>
     }
 
     @GetMapping(&quot;/activate-account&quot;)
     public void confirm(
             @RequestParam String token
     ) throws MessagingException {
-<span class="nc" id="L45">        service.activateAccount(token);</span>
-<span class="nc" id="L46">    }</span>
+<span class="fc" id="L53">        authenticationServiceImpl.activateAccount(token);</span>
+<span class="fc" id="L54">    }</span>
+
+    @PostMapping(&quot;/refresh-token&quot;)
+    public AuthenticationResponse refreshToken(
+            HttpServletRequest request
+    ) throws IOException {
+<span class="fc" id="L60">        final String authHeader = request.getHeader(&quot;Authorization&quot;);</span>
+        final String refreshToken;
+        final String username;
+
+<span class="pc bpc" id="L64" title="1 of 4 branches missed.">        if (authHeader == null || !authHeader.startsWith(&quot;Bearer &quot;)) {</span>
+<span class="fc" id="L65">            throw new RuntimeException(&quot;Missing refresh token&quot;);</span>
+        }
+<span class="fc" id="L67">        refreshToken = authHeader.substring(7);</span>
+<span class="fc" id="L68">        username = jwtServiceImpl.extractUsername(refreshToken);</span>
+
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">        if (username != null) {</span>
+<span class="fc" id="L71">            var user = this.userRepository.findByUsername(username)</span>
+<span class="fc" id="L72">                    .orElseThrow();</span>
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">            if (jwtServiceImpl.isTokenValid(refreshToken, user)) {</span>
+<span class="fc" id="L74">                var accessToken = jwtServiceImpl.generateToken(user);</span>
+
+                // відкликаємо ВСІ access токени користувача
+<span class="fc" id="L77">                authenticationServiceImpl.revokeAllUserAccessTokens(user);</span>
+
+                // зберігаємо новий access токен
+<span class="fc" id="L80">                authenticationServiceImpl.saveUserToken(user, accessToken, TokenType.ACCESS);</span>
+
+<span class="fc" id="L82">                return AuthenticationResponse.builder()</span>
+<span class="fc" id="L83">                        .accessToken(accessToken)</span>
+<span class="fc" id="L84">                        .refreshToken(refreshToken)</span>
+<span class="fc" id="L85">                        .build();</span>
+            }
+        }
+<span class="nc" id="L88">        throw new RuntimeException(&quot;Invalid refresh token&quot;);</span>
+    }
+
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

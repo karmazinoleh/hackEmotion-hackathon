@@ -74,32 +74,15 @@ public class AssetController {
     @GetMapping("/rate")
     public ResponseEntity<List<AssetResponse>> getAssetsToRate(HttpServletRequest request) {
         String username = jwtServiceImpl.extractUsername(request.getHeader("Authorization"));
-        // Get the user by username
+
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        Long userId = user.getId();
 
-        // Get all assets that the user has NOT created
-        List<Asset> allAssets = assetRepository.findAllByUserIdNot(userId);
+        List<AssetResponse> assetsToRate = assetServiceImpl.getAssetsToRate(user.getId());
 
-        // Get all assets that the user has already rated
-        List<UserAssetEmotion> userRatings = UAErepository.findAllByUserId(userId);
-        Set<Long> ratedAssetIds = userRatings.stream()
-                .map(rating -> rating.getAsset().getId())
-                .collect(Collectors.toSet());
-
-        // Filter out assets that the user has already rated
-        List<Asset> assetsToRate = allAssets.stream()
-                .filter(asset -> !ratedAssetIds.contains(asset.getId()))
-                .collect(Collectors.toList());
-
-        // Convert to response objects
-        List<AssetResponse> response = assetsToRate.stream()
-                .map(asset -> new AssetResponse(asset.getId(), asset.getName(), asset.getUrl()))
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(assetsToRate);
     }
+
     @PostMapping("/rate")
     public ResponseEntity<HttpStatus> voteForEmotion(HttpServletRequest request, @RequestBody VoteRequest voteRequest) {
         String username = jwtServiceImpl.extractUsername(request.getHeader("Authorization"));

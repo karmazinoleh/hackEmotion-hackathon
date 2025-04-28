@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AssetServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">hackemotion</a> &gt; <a href="index.source.html" class="el_package">com.ai.hackemotion.service.impl</a> &gt; <span class="el_source">AssetServiceImpl.java</span></div><h1>AssetServiceImpl.java</h1><pre class="source lang-java linenums">package com.ai.hackemotion.service.impl;
 
+import com.ai.hackemotion.dto.request.UserAssetEmotionRequest;
+import com.ai.hackemotion.dto.response.AssetResponse;
 import com.ai.hackemotion.entity.Asset;
 import com.ai.hackemotion.dto.request.AssetRequest;
 import com.ai.hackemotion.entity.Emotion;
@@ -12,64 +14,125 @@ import com.ai.hackemotion.entity.User;
 import com.ai.hackemotion.repository.UserRepository;
 import com.ai.hackemotion.service.AssetService;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 @Service
+@RequiredArgsConstructor
 public class AssetServiceImpl implements AssetService {
+
     private final AssetRepository assetRepository;
     private final EmotionRepository emotionRepository;
     private final UserAssetEmotionRepository userAssetEmotionRepository;
     private final UserRepository userRepository;
 
-<span class="fc" id="L24">    public AssetServiceImpl(AssetRepository assetRepository, EmotionRepository emotionRepository, UserAssetEmotionRepository userAssetEmotionRepository, UserRepository userRepository) {</span>
-<span class="fc" id="L25">        this.assetRepository = assetRepository;</span>
-<span class="fc" id="L26">        this.emotionRepository = emotionRepository;</span>
-<span class="fc" id="L27">        this.userAssetEmotionRepository = userAssetEmotionRepository;</span>
-<span class="fc" id="L28">        this.userRepository = userRepository;</span>
-<span class="fc" id="L29">    }</span>
-
-    /*public List&lt;String&gt; getEmotionNamesByAssetId(Long assetId) {
-        Asset asset = assetRepository.findById(assetId)
-                .orElseThrow(() -&gt; new RuntimeException(&quot;Asset not found with id: &quot; + assetId));
-
-        return userAssetEmotionRepository.findEmotionsByAssetId(asset.getId());
-    }*/
 
     public Asset createAsset(AssetRequest request) {
-<span class="fc" id="L39">        User user = userRepository.findByUsername(request.getUsername())</span>
-<span class="fc" id="L40">                .orElseThrow(() -&gt; new RuntimeException(&quot;User not found: &quot; + request.getUsername()));</span>
+<span class="fc" id="L34">        User user = userRepository.findByUsername(request.getUsername())</span>
+<span class="fc" id="L35">                .orElseThrow(() -&gt; new RuntimeException(&quot;User not found: &quot; + request.getUsername()));</span>
 
-<span class="fc" id="L42">        Asset asset = Asset.builder()</span>
-<span class="fc" id="L43">                .name(request.getName())</span>
-<span class="fc" id="L44">                .url(request.getUrl())</span>
-<span class="fc" id="L45">                .user(user)</span>
-<span class="fc" id="L46">                .build();</span>
+<span class="fc" id="L37">        Asset asset = Asset.builder()</span>
+<span class="fc" id="L38">                .name(request.getName())</span>
+<span class="fc" id="L39">                .url(request.getUrl())</span>
+<span class="fc" id="L40">                .user(user)</span>
+<span class="fc" id="L41">                .build();</span>
 
-<span class="fc" id="L48">        return assetRepository.save(asset);</span>
+<span class="fc" id="L43">        return assetRepository.save(asset);</span>
     }
 
 
     public Asset addEmotionsToAsset(Long assetId, EmotionRequest request) {
-<span class="fc" id="L53">        Asset asset = assetRepository.findById(assetId)</span>
-<span class="fc" id="L54">                .orElseThrow(() -&gt; new RuntimeException(&quot;Asset not found&quot;));</span>
+<span class="fc" id="L48">        Asset asset = assetRepository.findById(assetId)</span>
+<span class="fc" id="L49">                .orElseThrow(() -&gt; new RuntimeException(&quot;Asset not found&quot;));</span>
 
-<span class="fc" id="L56">        User user = userRepository.findByUsername(request.getUser().getUsername())</span>
-<span class="fc" id="L57">                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;User not found&quot;));</span>
+<span class="fc" id="L51">        User user = userRepository.findByUsername(request.getUser().getUsername())</span>
+<span class="fc" id="L52">                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;User not found&quot;));</span>
 
-<span class="fc bfc" id="L59" title="All 2 branches covered.">        for (Emotion emotion : request.getEmotions()) {</span>
-<span class="fc" id="L60">            Emotion existingEmotion = emotionRepository.findById(emotion.getId()) // На стороні сторінки ми передаємо назву, а не ID</span>
-<span class="fc" id="L61">                    .orElseThrow(() -&gt; new RuntimeException(&quot;Emotion not found: &quot; + emotion.getId()));</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        for (Emotion emotion : request.getEmotions()) {</span>
+<span class="fc" id="L55">            Emotion existingEmotion = emotionRepository.findById(emotion.getId()) // На стороні сторінки ми передаємо назву, а не ID</span>
+<span class="pc" id="L56">                    .orElseThrow(() -&gt; new RuntimeException(&quot;Emotion not found: &quot; + emotion.getId()));</span>
 
-<span class="fc" id="L63">            UserAssetEmotion userAssetEmotion = UserAssetEmotion.builder()</span>
-<span class="fc" id="L64">                    .user(user)</span>
-<span class="fc" id="L65">                    .asset(asset)</span>
-<span class="fc" id="L66">                    .emotion(existingEmotion)</span>
-<span class="fc" id="L67">                    .build();</span>
-<span class="fc" id="L68">            userAssetEmotionRepository.save(userAssetEmotion);</span>
-<span class="fc" id="L69">        }</span>
+<span class="fc" id="L58">            UserAssetEmotion userAssetEmotion = UserAssetEmotion.builder()</span>
+<span class="fc" id="L59">                    .user(user)</span>
+<span class="fc" id="L60">                    .asset(asset)</span>
+<span class="fc" id="L61">                    .emotion(existingEmotion)</span>
+<span class="fc" id="L62">                    .build();</span>
+<span class="fc" id="L63">            userAssetEmotionRepository.save(userAssetEmotion);</span>
+<span class="fc" id="L64">        }</span>
 
-<span class="fc" id="L71">        return asset;</span>
+<span class="fc" id="L66">        return asset;</span>
+    }
+
+    public List&lt;AssetResponse&gt; getAssetsToRate(Long userId) {
+        // Отримуємо всі активи, які не створені користувачем
+<span class="nc" id="L71">        List&lt;Asset&gt; allAssets = assetRepository.findAllByUserIdNot(userId);</span>
+
+        // Отримуємо всі активи, які користувач вже оцінив
+<span class="nc" id="L74">        List&lt;UserAssetEmotion&gt; userRatings = userAssetEmotionRepository.findAllByUserId(userId);</span>
+<span class="nc" id="L75">        Set&lt;Long&gt; ratedAssetIds = userRatings.stream()</span>
+<span class="nc" id="L76">                .map(rating -&gt; rating.getAsset().getId())</span>
+<span class="nc" id="L77">                .collect(Collectors.toSet());</span>
+
+        // Фільтруємо активи, які ще не були оцінені
+<span class="nc" id="L80">        List&lt;Asset&gt; assetsToRate = allAssets.stream()</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">                .filter(asset -&gt; !ratedAssetIds.contains(asset.getId()))</span>
+<span class="nc" id="L82">                .collect(Collectors.toList());</span>
+
+        // Перетворюємо в об'єкти відповіді
+<span class="nc" id="L85">        return assetsToRate.stream()</span>
+<span class="nc" id="L86">                .map(asset -&gt; new AssetResponse(asset.getId(), asset.getName(), asset.getUrl()))</span>
+<span class="nc" id="L87">                .collect(Collectors.toList());</span>
+    }
+
+    public List&lt;UserAssetEmotionRequest&gt; getAssetsByUsername(String username) {
+<span class="fc" id="L91">        Long userId = userRepository.findByUsername(username)</span>
+<span class="fc" id="L92">                .orElseThrow(() -&gt; new RuntimeException(&quot;Assets not found!&quot;)).getId();</span>
+
+<span class="fc" id="L94">        List&lt;UserAssetEmotion&gt; assetsList = userAssetEmotionRepository.findAllByUserId(userId);</span>
+<span class="fc" id="L95">        Map&lt;Long, UserAssetEmotionRequest&gt; assetMap = new HashMap&lt;&gt;();</span>
+
+<span class="fc bfc" id="L97" title="All 2 branches covered.">        for (UserAssetEmotion asset : assetsList) {</span>
+<span class="fc" id="L98">            Long assetId = asset.getAsset().getId();</span>
+<span class="fc" id="L99">            assetMap.putIfAbsent(assetId, new UserAssetEmotionRequest(assetId, asset.getAsset().getName(), new ArrayList&lt;&gt;()));</span>
+<span class="fc" id="L100">            String emotionName = asset.getEmotion().getName();</span>
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">            if (!assetMap.get(assetId).getEmotionNames().contains(emotionName)) {</span>
+<span class="fc" id="L102">                assetMap.get(assetId).getEmotionNames().add(emotionName);</span>
+            }
+<span class="fc" id="L104">        }</span>
+
+<span class="fc" id="L106">        return new ArrayList&lt;&gt;(assetMap.values());</span>
+    }
+
+    public List&lt;UserAssetEmotionRequest&gt; getAllAssets() {
+<span class="fc" id="L110">        List&lt;UserAssetEmotion&gt; assetsList = userAssetEmotionRepository.findAll();</span>
+<span class="fc" id="L111">        Map&lt;Long, UserAssetEmotionRequest&gt; assetMap = new HashMap&lt;&gt;();</span>
+
+<span class="fc bfc" id="L113" title="All 2 branches covered.">        for (UserAssetEmotion asset : assetsList) {</span>
+<span class="fc" id="L114">            Long assetId = asset.getAsset().getId();</span>
+<span class="fc" id="L115">            assetMap.putIfAbsent(assetId, new UserAssetEmotionRequest(assetId, asset.getAsset().getName(), new ArrayList&lt;&gt;()));</span>
+<span class="fc" id="L116">            String emotionName = asset.getEmotion().getName();</span>
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">            if (!assetMap.get(assetId).getEmotionNames().contains(emotionName)) {</span>
+<span class="fc" id="L118">                assetMap.get(assetId).getEmotionNames().add(emotionName);</span>
+            }
+<span class="fc" id="L120">        }</span>
+
+<span class="fc" id="L122">        return new ArrayList&lt;&gt;(assetMap.values());</span>
+    }
+
+    public boolean isAssetAvailableForUser(String assetName, String username) {
+<span class="fc" id="L126">        var user = userRepository.findByUsername(username);</span>
+<span class="fc" id="L127">        List&lt;Asset&gt; assets = assetRepository.findByUserId(user.get().getId());</span>
+
+<span class="pc bpc" id="L129" title="2 of 4 branches missed.">        if (assets == null || assetName == null) {</span>
+<span class="nc" id="L130">            return false;</span>
+        }
+
+<span class="fc" id="L133">        return assets.stream()</span>
+<span class="fc" id="L134">                .anyMatch(asset -&gt; assetName.equals(asset.getName()));</span>
     }
 
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

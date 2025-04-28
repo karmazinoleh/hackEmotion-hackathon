@@ -1,4 +1,5 @@
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/HackemotionApplication.java
+/Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/advice/GlobalExceptionHandler.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/config/BeansConfig.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/config/security/SecurityConfig.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/config/swagger/SwaggerConfig.java
@@ -6,7 +7,7 @@
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/controller/AssetController.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/controller/AuthenticationController.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/controller/EmotionController.java
-/Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/controller/FileUploadController.java
+/Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/controller/FileController.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/controller/MessagesController.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/controller/RatingController.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/dto/request/AssetRequest.java
@@ -28,6 +29,7 @@
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/entity/UserAssetEmotion.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/enums/EmailTemplateName.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/enums/EmotionType.java
+/Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/enums/TokenType.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/repository/AssetRepository.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/repository/EmotionRepository.java
 /Users/kalemz/Documents/GitHub/hackEmotion-hackathon/src/main/java/com/ai/hackemotion/repository/FinalAssetEmotionRepository.java
