@@ -67,72 +67,70 @@ public class AssetServiceImpl implements AssetService {
     }
 
     public List&lt;AssetResponse&gt; getAssetsToRate(Long userId) {
-        // Отримуємо всі активи, які не створені користувачем
-<span class="nc" id="L71">        List&lt;Asset&gt; allAssets = assetRepository.findAllByUserIdNot(userId);</span>
-
-        // Отримуємо всі активи, які користувач вже оцінив
-<span class="nc" id="L74">        List&lt;UserAssetEmotion&gt; userRatings = userAssetEmotionRepository.findAllByUserId(userId);</span>
-<span class="nc" id="L75">        Set&lt;Long&gt; ratedAssetIds = userRatings.stream()</span>
-<span class="nc" id="L76">                .map(rating -&gt; rating.getAsset().getId())</span>
-<span class="nc" id="L77">                .collect(Collectors.toSet());</span>
-
-        // Фільтруємо активи, які ще не були оцінені
-<span class="nc" id="L80">        List&lt;Asset&gt; assetsToRate = allAssets.stream()</span>
-<span class="nc bnc" id="L81" title="All 2 branches missed.">                .filter(asset -&gt; !ratedAssetIds.contains(asset.getId()))</span>
-<span class="nc" id="L82">                .collect(Collectors.toList());</span>
-
-        // Перетворюємо в об'єкти відповіді
-<span class="nc" id="L85">        return assetsToRate.stream()</span>
-<span class="nc" id="L86">                .map(asset -&gt; new AssetResponse(asset.getId(), asset.getName(), asset.getUrl()))</span>
-<span class="nc" id="L87">                .collect(Collectors.toList());</span>
+        List&lt;Asset&gt; allAssets = assetRepository.findAllByUserIdNot(userId);
+<span class="nc" id="L71"></span>
+        List&lt;UserAssetEmotion&gt; userRatings = userAssetEmotionRepository.findAllByUserId(userId);
+        Set&lt;Long&gt; ratedAssetIds = userRatings.stream()
+<span class="nc" id="L74">                .map(rating -&gt; rating.getAsset().getId())</span>
+<span class="nc" id="L75">                .collect(Collectors.toSet());</span>
+<span class="nc" id="L76"></span>
+<span class="nc" id="L77">        List&lt;Asset&gt; assetsToRate = allAssets.stream()</span>
+                .filter(asset -&gt; !ratedAssetIds.contains(asset.getId()))
+                .toList();
+<span class="nc" id="L80"></span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        return assetsToRate.stream()</span>
+<span class="nc" id="L82">                .map(asset -&gt; new AssetResponse(asset.getId(), asset.getName(), asset.getUrl()))</span>
+                .toList();
     }
+<span class="nc" id="L85"></span>
+<span class="nc" id="L86">    public List&lt;UserAssetEmotionRequest&gt; getAssetsByUsername(String username) {</span>
+<span class="nc" id="L87">        Long userId = userRepository.findByUsername(username)</span>
+                .orElseThrow(() -&gt; new RuntimeException(&quot;Assets not found!&quot;)).getId();
 
-    public List&lt;UserAssetEmotionRequest&gt; getAssetsByUsername(String username) {
-<span class="fc" id="L91">        Long userId = userRepository.findByUsername(username)</span>
-<span class="fc" id="L92">                .orElseThrow(() -&gt; new RuntimeException(&quot;Assets not found!&quot;)).getId();</span>
-
-<span class="fc" id="L94">        List&lt;UserAssetEmotion&gt; assetsList = userAssetEmotionRepository.findAllByUserId(userId);</span>
-<span class="fc" id="L95">        Map&lt;Long, UserAssetEmotionRequest&gt; assetMap = new HashMap&lt;&gt;();</span>
-
-<span class="fc bfc" id="L97" title="All 2 branches covered.">        for (UserAssetEmotion asset : assetsList) {</span>
-<span class="fc" id="L98">            Long assetId = asset.getAsset().getId();</span>
-<span class="fc" id="L99">            assetMap.putIfAbsent(assetId, new UserAssetEmotionRequest(assetId, asset.getAsset().getName(), new ArrayList&lt;&gt;()));</span>
-<span class="fc" id="L100">            String emotionName = asset.getEmotion().getName();</span>
-<span class="pc bpc" id="L101" title="1 of 2 branches missed.">            if (!assetMap.get(assetId).getEmotionNames().contains(emotionName)) {</span>
-<span class="fc" id="L102">                assetMap.get(assetId).getEmotionNames().add(emotionName);</span>
-            }
-<span class="fc" id="L104">        }</span>
-
-<span class="fc" id="L106">        return new ArrayList&lt;&gt;(assetMap.values());</span>
+        List&lt;UserAssetEmotion&gt; assetsList = userAssetEmotionRepository.findAllByUserId(userId);
+<span class="fc" id="L91">        Map&lt;Long, UserAssetEmotionRequest&gt; assetMap = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L92"></span>
+        for (UserAssetEmotion asset : assetsList) {
+<span class="fc" id="L94">            Long assetId = asset.getAsset().getId();</span>
+<span class="fc" id="L95">            assetMap.putIfAbsent(assetId, new UserAssetEmotionRequest(assetId, asset.getAsset().getName(), new ArrayList&lt;&gt;()));</span>
+            String emotionName = asset.getEmotion().getName();
+<span class="fc bfc" id="L97" title="All 2 branches covered.">            if (!assetMap.get(assetId).getEmotionNames().contains(emotionName)) {</span>
+<span class="fc" id="L98">                assetMap.get(assetId).getEmotionNames().add(emotionName);</span>
+<span class="fc" id="L99">            }</span>
+<span class="fc" id="L100">        }</span>
+<span class="pc bpc" id="L101" title="1 of 2 branches missed."></span>
+<span class="fc" id="L102">        return new ArrayList&lt;&gt;(assetMap.values());</span>
     }
-
+<span class="fc" id="L104"></span>
     public List&lt;UserAssetEmotionRequest&gt; getAllAssets() {
-<span class="fc" id="L110">        List&lt;UserAssetEmotion&gt; assetsList = userAssetEmotionRepository.findAll();</span>
-<span class="fc" id="L111">        Map&lt;Long, UserAssetEmotionRequest&gt; assetMap = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L106">        List&lt;UserAssetEmotion&gt; assetsList = userAssetEmotionRepository.findAll();</span>
+        Map&lt;Long, UserAssetEmotionRequest&gt; assetMap = new HashMap&lt;&gt;();
 
-<span class="fc bfc" id="L113" title="All 2 branches covered.">        for (UserAssetEmotion asset : assetsList) {</span>
-<span class="fc" id="L114">            Long assetId = asset.getAsset().getId();</span>
-<span class="fc" id="L115">            assetMap.putIfAbsent(assetId, new UserAssetEmotionRequest(assetId, asset.getAsset().getName(), new ArrayList&lt;&gt;()));</span>
-<span class="fc" id="L116">            String emotionName = asset.getEmotion().getName();</span>
-<span class="pc bpc" id="L117" title="1 of 2 branches missed.">            if (!assetMap.get(assetId).getEmotionNames().contains(emotionName)) {</span>
-<span class="fc" id="L118">                assetMap.get(assetId).getEmotionNames().add(emotionName);</span>
-            }
-<span class="fc" id="L120">        }</span>
-
-<span class="fc" id="L122">        return new ArrayList&lt;&gt;(assetMap.values());</span>
+        for (UserAssetEmotion asset : assetsList) {
+<span class="fc" id="L110">            Long assetId = asset.getAsset().getId();</span>
+<span class="fc" id="L111">            assetMap.putIfAbsent(assetId, new UserAssetEmotionRequest(assetId, asset.getAsset().getName(), new ArrayList&lt;&gt;()));</span>
+            String emotionName = asset.getEmotion().getName();
+<span class="fc bfc" id="L113" title="All 2 branches covered.">            if (!assetMap.get(assetId).getEmotionNames().contains(emotionName)) {</span>
+<span class="fc" id="L114">                assetMap.get(assetId).getEmotionNames().add(emotionName);</span>
+<span class="fc" id="L115">            }</span>
+<span class="fc" id="L116">        }</span>
+<span class="pc bpc" id="L117" title="1 of 2 branches missed."></span>
+<span class="fc" id="L118">        return new ArrayList&lt;&gt;(assetMap.values());</span>
     }
-
+<span class="fc" id="L120"></span>
     public boolean isAssetAvailableForUser(String assetName, String username) {
-<span class="fc" id="L126">        var user = userRepository.findByUsername(username);</span>
-<span class="fc" id="L127">        List&lt;Asset&gt; assets = assetRepository.findByUserId(user.get().getId());</span>
+<span class="fc" id="L122">        var user = userRepository.findByUsername(username);</span>
+        if (!user.isPresent()) {throw new EntityNotFoundException(&quot;User not found&quot;);}
 
-<span class="pc bpc" id="L129" title="2 of 4 branches missed.">        if (assets == null || assetName == null) {</span>
-<span class="nc" id="L130">            return false;</span>
-        }
-
-<span class="fc" id="L133">        return assets.stream()</span>
-<span class="fc" id="L134">                .anyMatch(asset -&gt; assetName.equals(asset.getName()));</span>
-    }
-
+        List&lt;Asset&gt; assets = assetRepository.findByUserId(user.get().getId());
+<span class="fc" id="L126"></span>
+<span class="fc" id="L127">        if (assets == null || assetName == null) {</span>
+            return false;
+<span class="pc bpc" id="L129" title="2 of 4 branches missed.">        }</span>
+<span class="nc" id="L130"></span>
+        return assets.stream()
+                .anyMatch(asset -&gt; assetName.equals(asset.getName()));
+<span class="fc" id="L133">    }</span>
+<span class="fc" id="L134"></span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

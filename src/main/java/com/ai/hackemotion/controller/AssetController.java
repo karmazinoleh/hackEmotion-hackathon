@@ -22,9 +22,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("asset")
@@ -32,12 +32,13 @@ import java.util.stream.Collectors;
 public class AssetController {
     private final AssetServiceImpl assetServiceImpl;
     private final EmotionServiceImpl service;
-    private final UserAssetEmotionRepository UAErepository;
+    private final UserAssetEmotionRepository userAssetEmotionRepository;
     private final UserRepository userRepository;
     private final AssetRepository assetRepository;
     private final EmotionRepository emotionRepository;
     private final FinalAssetEmotionServiceImpl finalAssetEmotionServiceImpl;
     private final JwtServiceImpl jwtServiceImpl;
+    String authorizationHeader = "Authorization";
 
     @PostMapping("/{assetId}/add-emotions")
     public ResponseEntity<Asset> addEmotions(
@@ -53,9 +54,9 @@ public class AssetController {
 
     @GetMapping("/")
     public ResponseEntity<List<UserAssetEmotionRequest>> getAssets(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
+        String authHeader = request.getHeader(authorizationHeader);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new RuntimeException("Missing or invalid Authorization header");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing or invalid Authorization header");
         }
         String token = authHeader.substring(7);
         String username = jwtServiceImpl.extractUsername(token);
@@ -73,7 +74,7 @@ public class AssetController {
 
     @GetMapping("/rate")
     public ResponseEntity<List<AssetResponse>> getAssetsToRate(HttpServletRequest request) {
-        String username = jwtServiceImpl.extractUsername(request.getHeader("Authorization"));
+        String username = jwtServiceImpl.extractUsername(request.getHeader(authorizationHeader));
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -85,13 +86,14 @@ public class AssetController {
 
     @PostMapping("/rate")
     public ResponseEntity<HttpStatus> voteForEmotion(HttpServletRequest request, @RequestBody VoteRequest voteRequest) {
-        String username = jwtServiceImpl.extractUsername(request.getHeader("Authorization"));
+        String username = jwtServiceImpl.extractUsername(request.getHeader(authorizationHeader));
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         Long assetId = voteRequest.getAssetId();
 
         // Check if user has already rated this asset
-        boolean alreadyRated = UAErepository.existsByUserIdAndAssetId(user.getId(), assetId);
+        boolean alreadyRated = userAssetEmotionRepository
+                .existsByUserIdAndAssetId(user.getId(), assetId);
         if (alreadyRated) {
             return ResponseEntity.badRequest().body(HttpStatus.CONFLICT);
         }
@@ -107,7 +109,7 @@ public class AssetController {
         vote.setAsset(asset);
         vote.setEmotion(emotion);
 
-        UAErepository.save(vote);
+        userAssetEmotionRepository.save(vote);
         finalAssetEmotionServiceImpl.updateFinalEmotion(assetId);
 
         return ResponseEntity.ok(HttpStatus.ACCEPTED);
