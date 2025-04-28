@@ -14,6 +14,7 @@ import org.springframework.security.core.GrantedAuthority;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -69,6 +70,13 @@ public class JwtServiceImpl implements JwtService {
                 .claim("authorities", authorities)
                 .signWith(getSignInKey())
                 .compact();
+    }
+
+    public boolean hasRole(String token, String role) {
+        Claims claims = extractAllClaims(token.replace("Bearer ", ""));
+        var authorities = (List<String>) claims.get("authorities");
+
+        return authorities != null && authorities.contains(role);
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
