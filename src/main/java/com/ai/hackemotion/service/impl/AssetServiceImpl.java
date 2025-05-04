@@ -35,7 +35,7 @@ public class AssetServiceImpl implements AssetService {
                 .orElseThrow(() -> new RuntimeException("User not found: " + request.getUsername()));
 
         Asset asset = Asset.builder()
-                .name(request.getName())
+                .name(request.getName().replace(" ", "_"))
                 .url(request.getUrl())
                 .user(user)
                 .build();
