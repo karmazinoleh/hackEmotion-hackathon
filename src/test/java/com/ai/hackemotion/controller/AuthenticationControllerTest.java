@@ -20,7 +20,6 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 
 import javax.management.InstanceAlreadyExistsException;
-import java.io.IOException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -82,7 +81,7 @@ class AuthenticationControllerTest {
     }
 
     @Test
-    void refreshToken_shouldReturnAuthenticationResponse() throws IOException {
+    void refreshToken_shouldReturnAuthenticationResponse() {
         HttpServletRequest mockRequest = mock(HttpServletRequest.class);
         String refreshToken = "Bearer refresh-token";
         String username = "testUser";
@@ -115,7 +114,7 @@ class AuthenticationControllerTest {
             authenticationController.refreshToken(mockRequest);
         });
 
-        assertEquals("Missing refresh token", exception.getMessage());
+        assertEquals("401 UNAUTHORIZED \"Missing refresh token\"", exception.getMessage());
     }
 
     @Test

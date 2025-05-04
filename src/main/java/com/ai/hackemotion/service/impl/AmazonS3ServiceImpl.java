@@ -65,4 +65,8 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
             return s3Object.readAllBytes();
         }
     }
+    protected S3Client getS3Client() {
+        return this.s3Client;
+    }
+
 }

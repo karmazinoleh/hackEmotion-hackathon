@@ -66,9 +66,9 @@ public class AssetController {
         }
 
         if(jwtServiceImpl.hasRole(token, "ADMIN")){
-            return ResponseEntity.ok(new ArrayList<>(assetServiceImpl.getAllAssets()));
+            return ResponseEntity.ok(assetServiceImpl.getAllAssets());
         } else {
-            return ResponseEntity.ok(new ArrayList<>(assetServiceImpl.getAssetsByUsername(username)));
+            return ResponseEntity.ok(assetServiceImpl.getAssetsByUsername(username));
         }
     }
 

@@ -13,5 +13,4 @@ public class UserAssetEmotionRequest {
     private Long id;
     private String name;
     private List<String> emotionNames;
-
 }
